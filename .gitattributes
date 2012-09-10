@@ -3,6 +3,7 @@ texhyphj/.classpath -text
 texhyphj/.project -text
 texhyphj/.settings/org.eclipse.jdt.core.prefs -text
 texhyphj/src/net/davidashen/text/Hyphenator.java -text
+texhyphj/src/net/davidashen/text/Scanner.java -text
 texhyphj/src/net/davidashen/util/Applicator.java -text
 texhyphj/src/net/davidashen/util/ErrorHandler.java -text
 texhyphj/src/net/davidashen/util/Hashtable.java -text
