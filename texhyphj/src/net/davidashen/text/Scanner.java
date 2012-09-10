@@ -18,8 +18,6 @@ class Scanner {
 		return (c0 << 8) + c1;
 	}
 
-
-
 	Scanner(java.io.InputStream in, int[] codelist, ErrorHandler eh) throws java.io.IOException {
 		this.codelist = codelist;
 		this.in = in;

@@ -135,55 +135,40 @@ public class Hyphenator {
 				if (inword) {
 					if (Character.isLetter(chars[ich])) {
 						ich++;
-					} else { /*
-							 * last character will be reprocessed in the other
-							 * state
-							 */
+					} else { // last character will be reprocessed in the other state
 						int length = ich - jch;
-						String word = new String(chars, jch, length)
-								.toLowerCase();
+						String word = new String(chars, jch, length).toLowerCase();
 						int[] values = (int[]) exceptions.get(word);
 						if (values == null) {
 							char[] echars = new char[length + 2];
 							values = new int[echars.length + 1];
 							echars[0] = echars[echars.length - 1] = '.';
 							for (int i = 0; i != length; ++i)
-								echars[1 + i] = Character
-										.toLowerCase(chars[jch + i]);
+								echars[1 + i] = Character.toLowerCase(chars[jch + i]);
 							for (int istart = 0; istart != length; ++istart) {
 								int iet = (int) echars[istart] % 256;
 								List entry = entrytab[iet];
 								int i = istart;
-								for (java.util.Enumeration eentry = entry
-										.elements(); eentry.hasMoreElements();) {
+								for (java.util.Enumeration eentry = entry.elements(); eentry.hasMoreElements();) {
 									entry = (List) eentry.nextElement();
 									if (((Character) entry.car()).charValue() == echars[i]) {
-										entry = entry.cdr(); /* values */
+										entry = entry.cdr(); // values
 										int[] nodevalues = (int[]) entry.car();
 										for (int inv = 0; inv != nodevalues.length; ++inv) {
 											if (nodevalues[inv] > values[istart + inv]) values[istart + inv] = nodevalues[inv];
 										}
 										++i;
 										if (i == echars.length) break;
-										eentry = entry.cdr().elements(); /*
-																		 * child
-																		 * nodes
-																		 */
+										eentry = entry.cdr().elements(); // child nodes
 									}
 								}
 							}
 							int[] newvalues = new int[length];
-							System.arraycopy(values, 2, newvalues, 0, length); /*
-																				 * save
-																				 * 12
-																				 * bytes
-																				 * ;
-																				 * senseless
-																				 */
+							System.arraycopy(values, 2, newvalues, 0, length); //save 12 bytes; senseless
 							values = newvalues;
 						}
 
-						/* now inserting soft hyphens */
+						// now inserting soft hyphens
 						if (remain_count + push_count <= length) {
 							for (int i = 0; i != remain_count - 1; ++i)
 								hychars[ihy++] = chars[jch++];
@@ -202,19 +187,12 @@ public class Hyphenator {
 				} else {
 					if (Character.isLetter(chars[ich])) {
 						jch = ich;
-						inword = true; /* jch remembers the start of the word */
+						inword = true; // jch remembers the start of the word
 					} else {
-						if (chars[ich] == (char) 0) break; /*
-															 * zero is a guard
-															 * inserted earlier
-															 */
+						if (chars[ich] == (char) 0) break; // zero is a guard inserted earlier
 						hychars[ihy++] = chars[ich];
-						if (chars[ich] == '\u002d' || chars[ich] == '\u2010') { /*
-																				 * dash
-																				 * or
-																				 * hyphen
-																				 */
-							hychars[ihy++] = '\u200b'; /* zero-width space */
+						if (chars[ich] == '\u002d' || chars[ich] == '\u2010') { // dash or hyphen
+							hychars[ihy++] = '\u200b'; // zero-width space
 						}
 					}
 					ich++;
