@@ -227,12 +227,11 @@ public class Hyphenator {
 	}
 
 	void readPattern(Scanner s) {
-		List entry = null, level = entrytab[(int) s.pattern[Character
-				.isDigit(s.pattern[0]) ? 1 : 0] % 256];
+		List entry = null, level = entrytab[(int) s.pattern[Character.isDigit(s.pattern[0]) ? 1 : 0] % 256];
 		int[] nodevalues = new int[s.patlen + 1];
 		int ich = 0, inv = 0;
 		java.util.Enumeration eentry = level.elements();
-		PATTERN: for (;;) {
+		for (;;) {
 			if (Character.isDigit(s.pattern[ich])) {
 				nodevalues[inv++] = ((int) s.pattern[ich++] - (int) '0');
 				if (ich == s.patlen) break;
