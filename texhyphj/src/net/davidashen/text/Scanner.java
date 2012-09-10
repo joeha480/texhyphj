@@ -1,31 +1,87 @@
 package net.davidashen.text;
 
+import java.io.IOException;
+
 import net.davidashen.util.ErrorHandler;
 import net.davidashen.util.Hashtable;
+import net.davidashen.util.List;
 
 /* parser for TeX hyphenation tables */
 class Scanner {
-	final static short EOF = 0, LBRAC = 1, RBRAC = 2, PATTERNS = 3,
-			EXCEPTIONS = 4, PATTERN = 5;
-	char[] pattern = new char[0];
-	int patlen;
+	final static short EOF = 0, LBRAC = 1, RBRAC = 2, PATTERNS = 3, EXCEPTIONS = 4, PATTERN = 5;
+	
+	private final ErrorHandler eh;
+	private final List[] entrytab;
+	private final Hashtable exceptions;
+	
 	private java.io.InputStream in;
 	private int[] codelist;
-	private ErrorHandler eh;
-	private int cc = '\n', cc1 = -1, prevlno = -1, lno = 0, cno = 0;
+	
+	char[] pattern = new char[0];
+	int patlen;
+	private int cc, cc1, prevlno, lno, cno;
+
 
 	private static final int cp2i(int c0, int c1) {
 		return (c0 << 8) + c1;
 	}
 
-	Scanner(java.io.InputStream in, int[] codelist, ErrorHandler eh) throws java.io.IOException {
-		this.codelist = codelist;
-		this.in = in;
+	Scanner(ErrorHandler eh) throws java.io.IOException {
+		exceptions = new Hashtable();
+		entrytab = new List[256];
+		for (int i = 0; i != 256; ++i) {
+			entrytab[i] = new List();
+		}
 		this.eh = eh;
+	}
+	
+	void scan(java.io.InputStream in, int[] codelist) {
+		this.in = in;
+		this.codelist = codelist;
+		cc = '\n'; cc1 = -1; prevlno = -1; lno = 0; cno = 0;
 		read();
+		final short EXCEPTIONS = 1, PATTERNS = 2, NONE = 0;
+		short state = NONE;
+		short sym;
+		LANGDATA: for (;;) {
+			sym = getSym();
+			switch (sym) {
+				case Scanner.EOF:
+					break LANGDATA;
+				case Scanner.PATTERNS:
+				case Scanner.EXCEPTIONS:
+					if (getSym() != Scanner.LBRAC) {
+						error("'{' expected");
+					}
+					state = sym == Scanner.PATTERNS ? PATTERNS : EXCEPTIONS;
+					continue LANGDATA;
+				case Scanner.RBRAC:
+					state = NONE;
+					continue LANGDATA;
+				case Scanner.PATTERN:
+					switch (state) {
+						case PATTERNS:
+							readPattern();
+							break;
+						case EXCEPTIONS:
+							readException();
+							break;
+						case NONE:
+							break;
+					}
+					continue LANGDATA;
+				case Scanner.LBRAC:
+				default:
+					error("problem parsing input");
+					continue LANGDATA;
+			}
+		}
+		try {
+			in.close();
+		} catch (IOException e) { }
 	}
 
-	short getSym() {
+	private short getSym() {
 		SYM: for (;;) {
 			while (isSpace())
 				read(); /* skip space */
@@ -77,6 +133,14 @@ class Scanner {
 					continue SYM;
 			}
 		}
+	}
+	
+	Object getExceptions(String word) {
+		return exceptions.get(word);
+	}
+	
+	List getEntryTab(int iet) {
+		return entrytab[iet];
 	}
 
 	private void read() {
@@ -251,15 +315,80 @@ class Scanner {
 			return Character.isLetterOrDigit(cc) || cc == '.' || cc == '-';
 		}
 	}
+	
+	private void readPattern() {
+		List entry = null, level = entrytab[(int) pattern[Character.isDigit(pattern[0]) ? 1 : 0] % 256];
+		int[] nodevalues = new int[patlen + 1];
+		int ich = 0, inv = 0;
+		java.util.Enumeration eentry = level.elements();
+		for (;;) {
+			if (Character.isDigit(pattern[ich])) {
+				nodevalues[inv++] = ((int) pattern[ich++] - (int) '0');
+				if (ich == patlen) break;
+			} else {
+				nodevalues[inv++] = 0;
+			}
+			for (;;) {
+				if (!eentry.hasMoreElements()) {
+					int[] newnodevalues = new int[inv + 1];
+					for (int jnv = 0; jnv != newnodevalues.length; ++jnv)
+						newnodevalues[jnv] = 0;
+					entry = new List().snoc(new Character(pattern[ich]))
+							.snoc(newnodevalues);
+					level.snoc(entry);
+					level = entry;
+					eentry = level.elements();
+					eentry.nextElement();
+					eentry.nextElement();
+					break;
+				}
+				entry = (List) eentry.nextElement();
+				if (((Character) entry.car()).charValue() == pattern[ich]) {
+					level = entry;
+					eentry = level.elements();
+					eentry.nextElement();
+					eentry.nextElement();
+					break;
+				}
+			}
+			if (++ich == patlen) {
+				nodevalues[inv++] = 0;
+				break;
+			}
+		}
+		System.arraycopy(nodevalues, 0, ((int[]) entry.cdr().car()), 0, inv);
+	}
 
-	void error(String msg) {
+	private void readException() {
+		int i0 = 0, in = patlen;
+		for (;;) {
+			if (in == i0) return;
+			else if (pattern[i0] == '-') ++i0;
+			else if (pattern[in - 1] == '-') --in;
+			else break;
+		}
+		int[] values = new int[in - i0];
+		int jch = 0;
+		for (int ich = i0; ich != in; ++ich) {
+			if (pattern[ich] == '-') {
+				values[jch - 1] = 1;
+			} else {
+				pattern[jch] = pattern[ich];
+				values[jch] = 0;
+				++jch;
+			}
+		}
+		exceptions.put(new String(pattern, 0, jch), values);
+	}
+
+	private void error(String msg) {
 		if (prevlno != lno) {
 			prevlno = lno; /* one message per line at most */
 			eh.error("(" + lno + "," + cno + "): " + msg);
 		}
 	}
 
-	void warning(String msg) {
+	private void warning(String msg) {
 		if (prevlno != lno) {
 			prevlno = lno; /* one message per line at most */
 			eh.warning("(" + lno + "," + cno + "): " + msg);

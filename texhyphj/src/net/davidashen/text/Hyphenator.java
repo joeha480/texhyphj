@@ -9,9 +9,8 @@ import net.davidashen.util.*;
  * uses TeX hyphenation tables
  */
 public class Hyphenator {
-	private Hashtable exceptions;
-	private List[] entrytab;
 	private ErrorHandler eh = ErrorHandler.DEFAULT;
+	private Scanner s;
 
 	/**
 	 * creates an uninitialized instance of Hyphenator.
@@ -57,47 +56,8 @@ public class Hyphenator {
 	 * @throws java.io.IOException
 	 */
 	public void loadTable(java.io.InputStream in, int[] codelist) throws java.io.IOException {
-		exceptions = new Hashtable();
-		entrytab = new List[256];
-		for (int i = 0; i != 256; ++i)
-			entrytab[i] = new List();
-		Scanner s = new Scanner(in, codelist, eh);
-		final short EXCEPTIONS = 1, PATTERNS = 2, NONE = 0;
-		short state = NONE;
-		short sym;
-		LANGDATA: for (;;) {
-			sym = s.getSym();
-			switch (sym) {
-				case Scanner.EOF:
-					break LANGDATA;
-				case Scanner.PATTERNS:
-				case Scanner.EXCEPTIONS:
-					if (s.getSym() != Scanner.LBRAC) {
-						s.error("'{' expected");
-					}
-					state = sym == Scanner.PATTERNS ? PATTERNS : EXCEPTIONS;
-					continue LANGDATA;
-				case Scanner.RBRAC:
-					state = NONE;
-					continue LANGDATA;
-				case Scanner.PATTERN:
-					switch (state) {
-						case PATTERNS:
-							readPattern(s);
-							break;
-						case EXCEPTIONS:
-							readException(s);
-							break;
-						case NONE:
-							break;
-					}
-					continue LANGDATA;
-				case Scanner.LBRAC:
-				default:
-					s.error("problem parsing input");
-					continue LANGDATA;
-			}
-		}
+		s = new Scanner(eh);
+		s.scan(in, codelist);
 	}
 
 	/**
@@ -138,7 +98,7 @@ public class Hyphenator {
 					} else { // last character will be reprocessed in the other state
 						int length = ich - jch;
 						String word = new String(chars, jch, length).toLowerCase();
-						int[] values = (int[]) exceptions.get(word);
+						int[] values = (int[]) s.getExceptions(word);
 						if (values == null) {
 							char[] echars = new char[length + 2];
 							values = new int[echars.length + 1];
@@ -147,7 +107,7 @@ public class Hyphenator {
 								echars[1 + i] = Character.toLowerCase(chars[jch + i]);
 							for (int istart = 0; istart != length; ++istart) {
 								int iet = (int) echars[istart] % 256;
-								List entry = entrytab[iet];
+								List entry = s.getEntryTab(iet);
 								int i = istart;
 								for (java.util.Enumeration eentry = entry.elements(); eentry.hasMoreElements();) {
 									entry = (List) eentry.nextElement();
@@ -202,71 +162,6 @@ public class Hyphenator {
 		} else {
 			return phrase;
 		}
-	}
-
-	void readPattern(Scanner s) {
-		List entry = null, level = entrytab[(int) s.pattern[Character.isDigit(s.pattern[0]) ? 1 : 0] % 256];
-		int[] nodevalues = new int[s.patlen + 1];
-		int ich = 0, inv = 0;
-		java.util.Enumeration eentry = level.elements();
-		for (;;) {
-			if (Character.isDigit(s.pattern[ich])) {
-				nodevalues[inv++] = ((int) s.pattern[ich++] - (int) '0');
-				if (ich == s.patlen) break;
-			} else {
-				nodevalues[inv++] = 0;
-			}
-			for (;;) {
-				if (!eentry.hasMoreElements()) {
-					int[] newnodevalues = new int[inv + 1];
-					for (int jnv = 0; jnv != newnodevalues.length; ++jnv)
-						newnodevalues[jnv] = 0;
-					entry = new List().snoc(new Character(s.pattern[ich]))
-							.snoc(newnodevalues);
-					level.snoc(entry);
-					level = entry;
-					eentry = level.elements();
-					eentry.nextElement();
-					eentry.nextElement();
-					break;
-				}
-				entry = (List) eentry.nextElement();
-				if (((Character) entry.car()).charValue() == s.pattern[ich]) {
-					level = entry;
-					eentry = level.elements();
-					eentry.nextElement();
-					eentry.nextElement();
-					break;
-				}
-			}
-			if (++ich == s.patlen) {
-				nodevalues[inv++] = 0;
-				break;
-			}
-		}
-		System.arraycopy(nodevalues, 0, ((int[]) entry.cdr().car()), 0, inv);
-	}
-
-	void readException(Scanner s) {
-		int i0 = 0, in = s.patlen;
-		for (;;) {
-			if (in == i0) return;
-			else if (s.pattern[i0] == '-') ++i0;
-			else if (s.pattern[in - 1] == '-') --in;
-			else break;
-		}
-		int[] values = new int[in - i0];
-		int jch = 0;
-		for (int ich = i0; ich != in; ++ich) {
-			if (s.pattern[ich] == '-') {
-				values[jch - 1] = 1;
-			} else {
-				s.pattern[jch] = s.pattern[ich];
-				values[jch] = 0;
-				++jch;
-			}
-		}
-		exceptions.put(new String(s.pattern, 0, jch), values);
 	}
 
 	/** simple command-line invocation -- serves as example */
