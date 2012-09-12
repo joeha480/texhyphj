@@ -56,8 +56,9 @@ public class Hyphenator {
 	 * @throws java.io.IOException
 	 */
 	public void loadTable(java.io.InputStream in, int[] codelist) throws java.io.IOException {
-		s = new Scanner(eh);
-		s.scan(in, codelist);
+		ByteScanner b = new ByteScanner(eh);
+		b.scan(in, codelist);
+		s = b;
 	}
 
 	/**
@@ -106,8 +107,7 @@ public class Hyphenator {
 							for (int i = 0; i != length; ++i)
 								echars[1 + i] = Character.toLowerCase(chars[jch + i]);
 							for (int istart = 0; istart != length; ++istart) {
-								int iet = (int) echars[istart] % 256;
-								List entry = s.getEntryTab(iet);
+								List entry = s.getList((int)echars[istart]);
 								int i = istart;
 								for (java.util.Enumeration eentry = entry.elements(); eentry.hasMoreElements();) {
 									entry = (List) eentry.nextElement();

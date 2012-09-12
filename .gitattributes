@@ -2,6 +2,7 @@
 texhyphj/.classpath -text
 texhyphj/.project -text
 texhyphj/.settings/org.eclipse.jdt.core.prefs -text
+texhyphj/src/net/davidashen/text/ByteScanner.java -text
 texhyphj/src/net/davidashen/text/Hyphenator.java -text
 texhyphj/src/net/davidashen/text/HyphenatorUI.java -text
 texhyphj/src/net/davidashen/text/Scanner.java -text
