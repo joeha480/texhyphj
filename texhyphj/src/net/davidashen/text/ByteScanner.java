@@ -135,8 +135,8 @@ class ByteScanner implements Scanner {
 		}
 	}
 	
-	public Object getExceptions(String word) {
-		return exceptions.get(word);
+	public int[] getException(String word) {
+		return (int[])exceptions.get(word);
 	}
 	
 	public List getList(int c) {

@@ -267,7 +267,10 @@ public class List implements Cloneable {
     return this;
   }
 
-  public String toString() {return isPair()?cdr().addToString(car().toString()):"()";}
+  public String toString() {
+	  return isPair()?cdr().addToString(car().toString()):"()";
+  }
+  
   private String addToString(String s) {
     if(isPair()) {
       return cdr().addToString(s+" "+car());

@@ -9,8 +9,8 @@ import net.davidashen.util.*;
  * uses TeX hyphenation tables
  */
 public class Hyphenator {
-	private ErrorHandler eh = ErrorHandler.DEFAULT;
-	private Scanner s;
+	private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
+	private Scanner scanner;
 
 	/**
 	 * creates an uninitialized instance of Hyphenator.
@@ -19,15 +19,35 @@ public class Hyphenator {
 	public Hyphenator() {
 	}
 
+
+	
+	public Scanner getScanner() {
+		return scanner;
+	}
+
+
+
+	public void setScanner(Scanner scanner) {
+		this.scanner = scanner;
+	}
+
+
+
+	public ErrorHandler getErrorHandler() {
+		return errorHandler;
+	}
+
+
+
 	/**
 	 * installs error handler.
 	 * 
-	 * @param eh
+	 * @param errorHandler
 	 *            ErrorHandler used while parsing and hyphenating
 	 * @see net.davidashen.util.ErrorHandler
 	 */
 	public void setErrorHandler(ErrorHandler eh) {
-		this.eh = eh;
+		this.errorHandler = eh;
 	}
 
 	/**
@@ -56,9 +76,9 @@ public class Hyphenator {
 	 * @throws java.io.IOException
 	 */
 	public void loadTable(java.io.InputStream in, int[] codelist) throws java.io.IOException {
-		ByteScanner b = new ByteScanner(eh);
+		ByteScanner b = new ByteScanner(errorHandler);
 		b.scan(in, codelist);
-		s = b;
+		scanner = b;
 	}
 
 	/**
@@ -77,10 +97,10 @@ public class Hyphenator {
 	 * 
 	 * @param phrase
 	 *            string to hyphenate
-	 * @param push_count
-	 *            unbreakable characters at the end of the string
 	 * @param remain_count
 	 *            unbreakable characters at the beginning of the string
+	 * @param push_count
+	 *            unbreakable characters at the end of the string
 	 * @return the string with soft hyphens inserted
 	 */
 	public String hyphenate(String phrase, int remain_count, int push_count) {
@@ -99,7 +119,7 @@ public class Hyphenator {
 					} else { // last character will be reprocessed in the other state
 						int length = ich - jch;
 						String word = new String(chars, jch, length).toLowerCase();
-						int[] values = (int[]) s.getExceptions(word);
+						int[] values =  scanner.getException(word);
 						if (values == null) {
 							char[] echars = new char[length + 2];
 							values = new int[echars.length + 1];
@@ -107,7 +127,7 @@ public class Hyphenator {
 							for (int i = 0; i != length; ++i)
 								echars[1 + i] = Character.toLowerCase(chars[jch + i]);
 							for (int istart = 0; istart != length; ++istart) {
-								List entry = s.getList((int)echars[istart]);
+								List entry = scanner.getList((int)echars[istart]);
 								int i = istart;
 								for (java.util.Enumeration eentry = entry.elements(); eentry.hasMoreElements();) {
 									entry = (List) eentry.nextElement();
