@@ -24,3 +24,7 @@ texhyphj/src/net/davidashen/util/Applicator.java -text
 texhyphj/src/net/davidashen/util/ErrorHandler.java -text
 texhyphj/src/net/davidashen/util/Hashtable.java -text
 texhyphj/src/net/davidashen/util/List.java -text
+texhyphj/test/net/davidashen/text/HyphenatorTest.java -text
+texhyphj/test/net/davidashen/text/resource-files/sherlock-expected.txt -text
+texhyphj/test/net/davidashen/text/resource-files/sherlock.txt -text
+texhyphj/test/net/davidashen/text/resource-files/ushyph.tex -text
