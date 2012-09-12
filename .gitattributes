@@ -15,6 +15,7 @@ texhyphj/doc/INSTALL -text
 texhyphj/doc/LICENSE -text
 texhyphj/doc/README -text
 texhyphj/lib/junit-4.7.jar -text
+texhyphj/run-tests.xml -text
 texhyphj/src/net/davidashen/text/ByteScanner.java -text
 texhyphj/src/net/davidashen/text/Hyphenator.java -text
 texhyphj/src/net/davidashen/text/HyphenatorUI.java -text
