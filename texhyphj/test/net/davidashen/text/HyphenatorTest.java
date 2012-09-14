@@ -3,15 +3,20 @@ package net.davidashen.text;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 
 import net.davidashen.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class HyphenatorTest {
@@ -19,7 +24,7 @@ public class HyphenatorTest {
 	@Test
 	public void simplestPossibleTest() {
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.setScanner(new Scanner() {
+		hyphenator.setRuleSet(new Scanner() {
 
 			public int[] getException(String word) {
 				//No exceptions
@@ -36,10 +41,14 @@ public class HyphenatorTest {
 		assertEquals(expected, result);
 	} 
 	
+	/**
+	 * TODO: Test using smallest possible rule set
+	 */
 	@Test
+	@Ignore
 	public void singleRule() {
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.setScanner(new Scanner() {
+		hyphenator.setRuleSet(new Scanner() {
 
 			public int[] getException(String word) {
 				//No exceptions
@@ -82,18 +91,22 @@ public class HyphenatorTest {
 		
 		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
 		
-		List list = hyphenator.getScanner().getList('a');
-		System.out.println(list);
+		System.out.println("Rule list for 'z':");
+		List list = hyphenator.getRuleSet().getList('z');
+		printList(list);
 		
-		printList(list, 0);
-		
-		String result  = hyphenator.hyphenate("Continues the work by David Tolpin. Specifically, adding UTF-8 support for pattern files.", leftHyphenMin, rightHyphenMin);
+		final String inputPhrase = "Continues the work by David Tolpin. Specifically, adding UTF-8 support for pattern files.";
+		String result  = hyphenator.hyphenate(inputPhrase, leftHyphenMin, rightHyphenMin);
 		String expected = "Contin\u00adues the work by David Tolpin. Specif\u00adi\u00adcal\u00adly, adding UTF-\u200b8 support for pattern files.";
 		assertEquals(expected, result);
 	}
 	
+	/**
+	 * Hyphenates a large file ('The adventures of sherlock holmes') and check that the behaviour 
+	 * has not changed since the last time the comparision file was created.   
+	 */
 	@Test
-	public void useRealGrammerFile() throws FileNotFoundException, IOException {
+	public void useWithRealGrammerAndComparisionFile() throws FileNotFoundException, IOException {
 		//u00ad is soft hyphen
 		Hyphenator hyphenator = new Hyphenator();
 		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
@@ -108,21 +121,10 @@ public class HyphenatorTest {
 		String inputLine;
 		String expectedLine;
 		
-		//Uncomment to write new comparison file
-		/*
-		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("out.txt")), utf8);
-		PrintWriter w = new PrintWriter(writer);
-
-		while ((inputLine=input.readLine())!=null) {
-			String actualLine = hyphenator.hyphenate(inputLine);
-			w.println(actualLine);
-		}
-		w.close();*/
-
-		//Comment out to write new comparison file
+		int lineNumber = 1; 
 		while ((inputLine=input.readLine())!=null & (expectedLine=expected.readLine())!=null) {
 			String actualLine = hyphenator.hyphenate(inputLine);
-			assertEquals(expectedLine, actualLine);
+			assertEquals("Line #" + (lineNumber++), expectedLine, actualLine);
 		}
 		assertEquals(inputLine, null);
 		assertEquals(expectedLine, null);
@@ -130,27 +132,70 @@ public class HyphenatorTest {
 		input.close();
 		expected.close();
 	}
+
+	/**
+	 * This generates a new file to use as expected result in the test 'useRealGrammerFile' above.
+	 *  
+	 *  Do not run as a test!
+	 */
+	@Test
+	@Ignore
+	public void createComparisionFile() throws FileNotFoundException, IOException {
+		//u00ad is soft hyphen
+		Hyphenator hyphenator = new Hyphenator();
+		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
+		Charset utf8 = Charset.forName("UTF-8");
+		
+		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sherlock.txt").openStream(), utf8);
+		LineNumberReader input = new LineNumberReader(reader);
+		
+		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("out.txt")), utf8);
+		PrintWriter output = new PrintWriter(writer);
+
+		String inputLine;
+		while ((inputLine=input.readLine())!=null) {
+			String hyphenatedLine = hyphenator.hyphenate(inputLine);
+			output.println(hyphenatedLine);
+		}
+		input.close();
+		output.close();
+	}
 	
-	private void printList(List list, int level) {
+	//// Helpers ///
+	private void printList(List list) {
+		printList(list, 0);
+	}
+	
+	private void printList(final List list, final int level) {
 		Enumeration enumeration = list.elements();
 		
 		while (enumeration.hasMoreElements()) {
 			Object o = enumeration.nextElement();
+			
 			for (int i=0; i<level; i++) {
-				System.out.print(" ");
+				System.out.print("\t");
 			}
+			System.out.print(o.getClass().toString() + ": ");
+			
 			if(o instanceof List) {
-				System.out.println("- " + ((List)o).car());
-				printList((List)o, level++);
-			} else if (o instanceof int[]){
-				int[] ints = (int[]) o;
-				for (int i : ints) {
-					System.out.print(i + ", ");
+				System.out.println("( ");
+				printList((List)o, level + 1);
+				for (int i=0; i<level; i++) {
+					System.out.print("\t");
 				}
-				System.out.println("");
+				System.out.println(")");
 
+			} else if (o instanceof int[]){
+				System.out.print("[");
+				int[] ints = (int[]) o;
+				String separator = "";
+				for (int i : ints) {
+					System.out.print(separator + i);
+					separator = ", ";
+				}
+				System.out.println("]");
 			} else {
-				System.out.println(o.getClass().toString() + ": " + o.toString());
+				System.out.println(o.toString());
 			}
 		}
 		

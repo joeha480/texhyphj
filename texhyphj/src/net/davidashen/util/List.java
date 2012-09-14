@@ -154,7 +154,7 @@ public class List implements Cloneable {
  /** the first element of the list
  @return the object kept in the first element
  */
-  public final Object car() {
+  public final Object head() {
     if(!isPair()) throw new java.util.NoSuchElementException("list is not a pair");
     return head.next.data;
   }
@@ -167,10 +167,11 @@ public class List implements Cloneable {
     return tail.next.data;
   }
 
+ 
  /** the list's longest 'tail'
  @return an object of the same type holding  all the elements but the first one
  */
-  public final List cdr() {
+  public final List longTail() {
     List l=newList();
     if(!isPair()) throw new java.util.NoSuchElementException("list is not a pair");
     l.head.next=head.next.next; l.tail=tail; l.length=length-1;
@@ -181,7 +182,7 @@ public class List implements Cloneable {
  /** the list's shortest 'tail' 
  @return a list containing only the last element 
  */
-  public final List cDr() {
+  public final List shortestTail() {
     List l=newList();
     if(!isPair()) throw new java.util.NoSuchElementException("list is not a pair");
     l.head.next=tail.next; l.tail=tail; l.length=length-1;
@@ -268,12 +269,12 @@ public class List implements Cloneable {
   }
 
   public String toString() {
-	  return isPair()?cdr().addToString(car().toString()):"()";
+	  return isPair()?longTail().addToString(head().toString()):"()";
   }
   
   private String addToString(String s) {
     if(isPair()) {
-      return cdr().addToString(s+" "+car());
+      return longTail().addToString(s+" "+head());
     } else {
       return "("+s+")";
     }

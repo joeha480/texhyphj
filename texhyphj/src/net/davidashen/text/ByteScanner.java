@@ -343,7 +343,7 @@ class ByteScanner implements Scanner {
 					break;
 				}
 				entry = (List) eentry.nextElement();
-				if (((Character) entry.car()).charValue() == pattern[ich]) {
+				if (((Character) entry.head()).charValue() == pattern[ich]) {
 					level = entry;
 					eentry = level.elements();
 					eentry.nextElement();
@@ -356,7 +356,7 @@ class ByteScanner implements Scanner {
 				break;
 			}
 		}
-		System.arraycopy(nodevalues, 0, ((int[]) entry.cdr().car()), 0, inv);
+		System.arraycopy(nodevalues, 0, ((int[]) entry.longTail().head()), 0, inv);
 	}
 
 	private void readException() {

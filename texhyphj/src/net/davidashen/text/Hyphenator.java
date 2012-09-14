@@ -5,39 +5,30 @@ package net.davidashen.text;
 import net.davidashen.util.*;
 
 /**
- * insert soft hyphens at all allowed locations
- * uses TeX hyphenation tables
+ * insert soft hyphens at all allowed locations uses TeX hyphenation tables
  */
 public class Hyphenator {
 	private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
-	private Scanner scanner;
+	private Scanner ruleSet;
 
 	/**
-	 * creates an uninitialized instance of Hyphenator.
-	 * The same instance can be reused for different hyphenation tables.
+	 * creates an uninitialized instance of Hyphenator. The same instance can be
+	 * reused for different hyphenation tables.
 	 */
 	public Hyphenator() {
 	}
 
-
-	
-	public Scanner getScanner() {
-		return scanner;
+	public Scanner getRuleSet() {
+		return ruleSet;
 	}
 
-
-
-	public void setScanner(Scanner scanner) {
-		this.scanner = scanner;
+	public void setRuleSet(Scanner scanner) {
+		this.ruleSet = scanner;
 	}
-
-
 
 	public ErrorHandler getErrorHandler() {
 		return errorHandler;
 	}
-
-
 
 	/**
 	 * installs error handler.
@@ -75,10 +66,11 @@ public class Hyphenator {
 	 *            an array of 256 elements. maps one-byte codes to UTF codes
 	 * @throws java.io.IOException
 	 */
-	public void loadTable(java.io.InputStream in, int[] codelist) throws java.io.IOException {
+	public void loadTable(java.io.InputStream in, int[] codelist)
+			throws java.io.IOException {
 		ByteScanner b = new ByteScanner(errorHandler);
 		b.scan(in, codelist);
-		scanner = b;
+		ruleSet = b;
 	}
 
 	/**
@@ -97,127 +89,185 @@ public class Hyphenator {
 	 * 
 	 * @param phrase
 	 *            string to hyphenate
-	 * @param remain_count
-	 *            unbreakable characters at the beginning of the string
-	 * @param push_count
-	 *            unbreakable characters at the end of the string
+	 * @param leftHyphenMin
+	 *            unbreakable characters at the beginning of each word in the
+	 *            phrase
+	 * @param rightHyphenMin
+	 *            unbreakable characters at the end of each word in the phrase
 	 * @return the string with soft hyphens inserted
 	 */
-	public String hyphenate(String phrase, int remain_count, int push_count) {
-		if (remain_count < 1) remain_count = 1;
-		if (push_count < 1) push_count = 1;
-		if (phrase.length() >= push_count + remain_count) {
-			int jch = Integer.MIN_VALUE, ich = 0, ihy = 0;
-			char[] chars = new char[phrase.length() + 1], hychars = new char[chars.length * 2 - 1];
-			chars[chars.length - 1] = (char) 0;
-			phrase.getChars(0, phrase.length(), chars, 0);
-			boolean inword = false;
-			for (;;) {
-				if (inword) {
-					if (Character.isLetter(chars[ich])) {
-						ich++;
-					} else { // last character will be reprocessed in the other state
-						int length = ich - jch;
-						String word = new String(chars, jch, length).toLowerCase();
-						int[] values =  scanner.getException(word);
-						if (values == null) {
-							char[] echars = new char[length + 2];
-							values = new int[echars.length + 1];
-							echars[0] = echars[echars.length - 1] = '.';
-							for (int i = 0; i != length; ++i)
-								echars[1 + i] = Character.toLowerCase(chars[jch + i]);
-							for (int istart = 0; istart != length; ++istart) {
-								List entry = scanner.getList((int)echars[istart]);
-								int i = istart;
-								for (java.util.Enumeration eentry = entry.elements(); eentry.hasMoreElements();) {
-									entry = (List) eentry.nextElement();
-									if (((Character) entry.car()).charValue() == echars[i]) {
-										entry = entry.cdr(); // values
-										int[] nodevalues = (int[]) entry.car();
-										for (int inv = 0; inv != nodevalues.length; ++inv) {
-											if (nodevalues[inv] > values[istart + inv]) values[istart + inv] = nodevalues[inv];
-										}
-										++i;
-										if (i == echars.length) break;
-										eentry = entry.cdr().elements(); // child nodes
-									}
-								}
-							}
-							int[] newvalues = new int[length];
-							System.arraycopy(values, 2, newvalues, 0, length); //save 12 bytes; senseless
-							values = newvalues;
-						}
+	public String hyphenate(String phrase, int leftHyphenMin, int rightHyphenMin) {
 
-						// now inserting soft hyphens
-						if (remain_count + push_count <= length) {
-							for (int i = 0; i != remain_count - 1; ++i)
-								hychars[ihy++] = chars[jch++];
-							for (int i = remain_count - 1; i != length - push_count; ++i) {
-								hychars[ihy++] = chars[jch++];
-								if (values[i] % 2 == 1) hychars[ihy++] = '\u00ad';
-							}
-							for (int i = length - push_count; i != length; ++i)
-								hychars[ihy++] = chars[jch++];
-						} else {
-							for (int i = 0; i != length; ++i)
-								hychars[ihy++] = chars[jch++];
-						}
-						inword = false;
-					}
-				} else {
-					if (Character.isLetter(chars[ich])) {
-						jch = ich;
-						inword = true; // jch remembers the start of the word
-					} else {
-						if (chars[ich] == (char) 0) break; // zero is a guard inserted earlier
-						hychars[ihy++] = chars[ich];
-						if (chars[ich] == '\u002d' || chars[ich] == '\u2010') { // dash or hyphen
-							hychars[ihy++] = '\u200b'; // zero-width space
-						}
-					}
-					ich++;
-				}
-			}
-			return new String(hychars, 0, ihy);
-		} else {
+		// Check input
+		// TODO: Log this, should possibly never happen?
+		leftHyphenMin = Math.max(leftHyphenMin, 1);
+		rightHyphenMin = Math.max(rightHyphenMin, 1);
+
+		// Ignore short phrases (early out)
+		if (phrase.length() < rightHyphenMin + leftHyphenMin) {
 			return phrase;
 		}
+
+		int processedOffset = Integer.MIN_VALUE; 
+		int ich = 0; 
+		char[] sourcePhraseChars = new char[phrase.length() + 1];
+		sourcePhraseChars[sourcePhraseChars.length - 1] = (char) 0;
+		phrase.getChars(0, phrase.length(), sourcePhraseChars, 0);
+
+		
+		char[] hyphenatedPhraseChars = new char[sourcePhraseChars.length * 2 - 1];
+		int ihy = 0;
+		
+		boolean inword = false;
+		while (true) {
+			if (inword) {
+				if (Character.isLetter(sourcePhraseChars[ich])) {
+					ich++;
+				} else { // last character will be reprocessed in the other
+							// state
+					int length = ich - processedOffset;
+					String word = new String(sourcePhraseChars, processedOffset, length).toLowerCase();
+					int[] hyphenQualificationPoints = ruleSet
+							.getException(word);
+
+					if (hyphenQualificationPoints == null) {
+						char[] wordChars = extractWord(sourcePhraseChars, processedOffset, length);
+						hyphenQualificationPoints = applyHyphenationRules(
+								wordChars, length);
+					}
+
+					// now inserting soft hyphens
+					if (leftHyphenMin + rightHyphenMin <= length) {
+						for (int i = 0; i < leftHyphenMin - 1; i++){
+							hyphenatedPhraseChars[ihy++] = sourcePhraseChars[processedOffset++];
+						}
+						
+						for (int i = leftHyphenMin - 1; i < length
+								- rightHyphenMin; i++) {
+							hyphenatedPhraseChars[ihy++] = sourcePhraseChars[processedOffset++];
+							if (hyphenQualificationPoints[i] % 2 == 1)
+								hyphenatedPhraseChars[ihy++] = '\u00ad';
+						}
+						
+						for (int i = length - rightHyphenMin; i < length; i++){
+							hyphenatedPhraseChars[ihy++] = sourcePhraseChars[processedOffset++];
+						}
+					} else {
+						//Word is to short to hyphenate, so just copy
+						for (int i = 0; i != length; ++i){
+							hyphenatedPhraseChars[ihy++] = sourcePhraseChars[processedOffset++];
+						}
+					}
+					inword = false;
+				}
+			} else {
+				if (Character.isLetter(sourcePhraseChars[ich])) {
+					processedOffset = ich;
+					inword = true; // jch remembers the start of the word
+				} else {
+					if (sourcePhraseChars[ich] == (char) 0)
+						break; // zero is a guard inserted earlier
+					hyphenatedPhraseChars[ihy++] = sourcePhraseChars[ich];
+					if (sourcePhraseChars[ich] == '\u002d' || sourcePhraseChars[ich] == '\u2010') { // dash
+																			// or
+																			// hyphen
+						hyphenatedPhraseChars[ihy++] = '\u200b'; // zero-width space
+					}
+				}
+				ich++;
+			}
+		}
+		return new String(hyphenatedPhraseChars, 0, ihy);
 	}
+
+	/**
+	 * Extract a word from a char array. The word is converted to lower case and
+	 * a '.' character is appended to the beginning and end of the new array.
+	 * 
+	 * @param chars
+	 *            The character array to extract a smaller section from
+	 * @param wordStart
+	 *            First character to include from the source array <b>chars</b>.
+	 * @param wordLength
+	 *            Number of characters to include from the source array
+	 *            <b>chars</b>
+	 * @return Word converted so lower case and surrounded by '.'
+	 */
+	private char[] extractWord(char[] chars, int wordStart, int wordLength) {
+		char[] echars = new char[wordLength + 2];
+		echars[0] = echars[echars.length - 1] = '.';
+		for (int i = 0; i < wordLength; i++) {
+			echars[1 + i] = Character.toLowerCase(chars[wordStart + i]);
+		}
+		return echars;
+	}
+	
+	/**
+	 * Generate a hyphen qualification points for a word by applying rules.
+	 * 
+	 * @param wordChars
+	 *            Word surrounded by '.' characters
+	 * @param length
+	 *            Length of the word (excluding '.' characters)
+	 * @return hyphen qualification points for the word
+	 */
+	private int[] applyHyphenationRules(final char[] wordChars, final int length) {
+		int[] hyphenQualificationPoints = new int[wordChars.length + 1];
+
+		for (int istart = 0; istart < length; istart++) {
+			List rules = ruleSet.getList((int) wordChars[istart]);
+			int i = istart;
+
+			java.util.Enumeration rulesEnumeration = rules.elements();
+			while(rulesEnumeration.hasMoreElements()) {
+				rules = (List) rulesEnumeration.nextElement();
+
+				if (((Character) rules.head()).charValue() == wordChars[i]) {
+					rules = rules.longTail(); // values
+					int[] nodevalues = (int[]) rules.head();
+					for (int inv = 0; inv < nodevalues.length; inv++) {
+						if (nodevalues[inv] > hyphenQualificationPoints[istart
+								+ inv]){
+							hyphenQualificationPoints[istart + inv] = nodevalues[inv];
+							}
+					}
+					i++;
+
+					if (i == wordChars.length) {
+						break;
+					}
+					rulesEnumeration = rules.longTail().elements(); // child
+														// nodes
+				}
+			}
+		}
+
+		int[] newvalues = new int[length];
+		System.arraycopy(hyphenQualificationPoints, 2, newvalues, 0, length); // save
+		// 12
+		// bytes;
+		// senseless
+		hyphenQualificationPoints = newvalues;
+		return hyphenQualificationPoints;
+	}
+
 
 }
 
 /*
- * $Log: Hyphenator.java,v $
- * Revision 1.17 2003/08/25 08:41:28 dvd
- * 1. Added symbolic accents: dot above, ring, ogonek, \i.
- * 2. Updated hyphenation tables for German, two tables are provided, with
- * hexadecimal values and symbolic accents.
- * Revision 1.16 2003/08/21 16:03:52 dvd
- * atilde added
- * Revision 1.15 2003/08/21 08:52:59 dvd
- * pre-release 1.0
- * Revision 1.14 2003/08/21 05:50:30 dvd
- * *** empty log message ***
- * Revision 1.13 2003/08/20 22:40:24 dvd
- * bug fixes
- * Revision 1.12 2003/08/20 22:34:38 dvd
- * bug fixes
- * Revision 1.11 2003/08/20 22:18:01 dvd
- * *** empty log message ***
- * Revision 1.10 2003/08/20 20:34:46 dvd
- * complete acctab
- * Revision 1.9 2003/08/20 18:55:36 dvd
- * Makefile makes
- * Revision 1.8 2003/08/20 18:07:07 dvd
- * main() added to Hyphenator as invocation example
- * Revision 1.7 2003/08/20 17:31:55 dvd
- * polish l and scandinavian o (accented) are fixed
- * Revision 1.6 2003/08/20 16:12:32 dvd
- * java docs
- * Revision 1.5 2003/08/17 22:06:12 dvd
- * *** empty log message ***
- * Revision 1.4 2003/08/17 21:55:24 dvd
- * Hyphenator.java is a java program
- * Revision 1.3 2003/08/17 20:30:43 dvd
- * CVS keywords added
+ * $Log: Hyphenator.java,v $ Revision 1.17 2003/08/25 08:41:28 dvd 1. Added
+ * symbolic accents: dot above, ring, ogonek, \i. 2. Updated hyphenation tables
+ * for German, two tables are provided, with hexadecimal values and symbolic
+ * accents. Revision 1.16 2003/08/21 16:03:52 dvd atilde added Revision 1.15
+ * 2003/08/21 08:52:59 dvd pre-release 1.0 Revision 1.14 2003/08/21 05:50:30 dvd
+ * *** empty log message *** Revision 1.13 2003/08/20 22:40:24 dvd bug fixes
+ * Revision 1.12 2003/08/20 22:34:38 dvd bug fixes Revision 1.11 2003/08/20
+ * 22:18:01 dvd *** empty log message *** Revision 1.10 2003/08/20 20:34:46 dvd
+ * complete acctab Revision 1.9 2003/08/20 18:55:36 dvd Makefile makes Revision
+ * 1.8 2003/08/20 18:07:07 dvd main() added to Hyphenator as invocation example
+ * Revision 1.7 2003/08/20 17:31:55 dvd polish l and scandinavian o (accented)
+ * are fixed Revision 1.6 2003/08/20 16:12:32 dvd java docs Revision 1.5
+ * 2003/08/17 22:06:12 dvd *** empty log message *** Revision 1.4 2003/08/17
+ * 21:55:24 dvd Hyphenator.java is a java program Revision 1.3 2003/08/17
+ * 20:30:43 dvd CVS keywords added
  */
