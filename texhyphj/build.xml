@@ -69,6 +69,7 @@
     		<zipfileset dir="${lib.dir}" prefix="${zip-foler-prefix}">
     			<include name="*.jar"/>
     			<exclude name="junit*.jar"/>
+    			<exclude name="hamcrest*.jar"/>
     		</zipfileset>
     		<zipfileset dir="${javadoc.dir}" prefix="${zip-foler-prefix}/doc/api">
     			<include name="**/*.*"/>
