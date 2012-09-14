@@ -1,6 +1,7 @@
 package net.davidashen.text;
 
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.equalTo;
@@ -88,13 +89,53 @@ public class TreeNodeTest {
 		TreeNode node = new TreeNode("a");
 		node.createChild("za", new int[] { 0, 0, 1 });
 	}
+	
+	@Test
+	public void addGrandchildCreatesChildren() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChild("za", new int[] { 0, 0, 1 });
+		
+		TreeNode middleNode = root.getChild('z');
+		assertThat(middleNode, hasProperty("segment", equalTo("z")));
+		assertThat(middleNode, hasProperty("blank", equalTo(true)));
+	}
 
-	// TODO: Add grand child creates blank placeholder nodes
-	// TODO: Replace existing "blank" node (created as in-between) with concrete
-	// node.
+	
+	@Test 
+	public void thatNewNodeCanBeCreatedFromPattern() {
+		//Digit first
+		TreeNode zb = TreeNode.createFromPattern("4zb");
+		assertEquals("node segment", "zb", zb.getSegment());
+		assertArrayEquals("hyphenation", new int[] { 4, 0, 0 }, zb.getHyphenation());
+
+		//Digit in the middle
+		TreeNode zero = TreeNode.createFromPattern("ze3ro");
+		assertEquals("node segment", "zero", zero.getSegment());
+		assertArrayEquals("hyphenation", new int[] { 0,0, 3,0,0 }, zero.getHyphenation());
+
+		//Digit at the end
+		TreeNode za1 = TreeNode.createFromPattern("za1");
+		assertEquals("node segment", "za", za1.getSegment());
+		assertArrayEquals("hyphenation", new int[] { 0, 0, 1 }, za1.getHyphenation());
+	} 
+	
+	//TODO: Support control numbers higher than 9
+
+	
+	@Test 
+	public void thatChildNodeCanBeCreatedFromPattern() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("a1");
+		
+		TreeNode child = root.getChild('a');
+		assertThat( child,
+				hasProperty("segment", equalTo("a")));
+		assertArrayEquals("grandchild hyphenation", new int[] { 0, 1 },
+				child.getHyphenation());
+	}
+	
+	// TODO: Replace existing blank node with concrete node.
 	// TODO: Exception on (non-blank) duplicate
-
-	// TODO: Create node from string "ab2c" -> ("abc", [0,0,2,0])
 
 	// TODO: Generate List structures for consumption in Hyphenator
 }

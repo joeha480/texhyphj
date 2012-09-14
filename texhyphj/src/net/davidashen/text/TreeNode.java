@@ -5,7 +5,6 @@ import java.util.Map;
 
 /**
  * Tree structure for representing hyphenation rules in a type safe manner.
- * 
  */
 public class TreeNode {
 	final private String segment;
@@ -18,6 +17,42 @@ public class TreeNode {
 	 */
 	public static TreeNode createRoot() {
 		return new TreeNode("");
+	}
+	
+	/**
+	 * Create a new node from a string pattern
+	 */
+	public static TreeNode createFromPattern(String pattern) {
+		char[] patternChars = pattern.toCharArray();
+
+		int characterCount = 0;
+		char[] segmentChars = new char[patternChars.length]; 
+		int[] hyphenations = new int[patternChars.length+1];
+		
+		
+		for (char c : patternChars) {
+			if(Character.isDigit(c)) {
+				hyphenations[characterCount] = Integer.parseInt("" +  c);
+			} else {
+				segmentChars[characterCount++] = c;
+			}
+		}
+		
+		return new TreeNode(
+				String.copyValueOf(segmentChars, 0, characterCount), 
+				copyOfRange(hyphenations, 0, characterCount+1)
+				);
+	}
+	
+	/**
+	 * Arrays.copyOfRange() was implemented in Java 6, and we still need Java 5 as the minimum requirement. 
+	 */
+	private static int[] copyOfRange(int[] srcArray, int offset, int length) {
+		int[] destArray = new int[length];
+		for(int i = offset; i < length; i++) {
+			destArray[i] = srcArray[offset + i];
+		}
+		return destArray;
 	}
 
 	/**
@@ -60,10 +95,29 @@ public class TreeNode {
 			children.put(segment.charAt(segment.length() - 1), node);
 		} else {
 			final char keyCharacter = segment.charAt(this.segment.length());
+			if(!hasChild(keyCharacter)){
+				addBlankChild(keyCharacter);
+			}
 			getChild(keyCharacter).createChild(segment, hyphenation);
 		}
 	}
+	
+	/**
+	 * Add place holder node required by tree structure. 
+	 */
+	private void addBlankChild(char nodeCharacter) {
+		children.put(nodeCharacter, new TreeNode(this.segment + nodeCharacter));
+	}
 
+	/**
+	 * Parse pattern and add the resulting segment and hyphernation to the tree.
+	 */
+	public void createChildFromPattern(String pattern) {
+		TreeNode tmpNode = TreeNode.createFromPattern(pattern); 
+		this.createChild( tmpNode.getSegment(), tmpNode.getHyphenation());
+	}
+
+	
 	public String getSegment() {
 		return segment;
 	}
@@ -76,6 +130,10 @@ public class TreeNode {
 		return hyphenation;
 	}
 
+	public boolean hasChild(char c) {
+		return children.containsKey(c);
+	}
+	
 	public TreeNode getChild(char c) {
 		return children.get(c);
 	}
