@@ -42,10 +42,9 @@ public class HyphenatorTest {
 	} 
 	
 	/**
-	 * TODO: Test using smallest possible rule set
+	 * Test using smallest possible rule set
 	 */
 	@Test
-	@Ignore
 	public void singleRule() {
 		Hyphenator hyphenator = new Hyphenator();
 		hyphenator.setRuleSet(new Scanner() {
@@ -55,16 +54,21 @@ public class HyphenatorTest {
 				return null;
 			}
 
+			/**
+			 * Returns a rules wrapped in an outer list.
+			 */
 			public List getList(int c) {
-				List list = new List();
-				return list;
+				List outerList = new List();
+				List innerList = new List();
+				innerList.snoc(new Character('i'));
+				innerList.snoc(new int[]{1,0});
+				outerList.snoc(innerList);
+				return outerList;
 			}
 		});
 		
-		fail("Not complete!");
-		
 		String result  = hyphenator.hyphenate("Continues the work by David Tolpin. Specifically, adding UTF-8 support for pattern files.");
-		String expected = "Continues the work by David Tolpin. Specifically, adding UTF-\u200b8 support for pattern files.";
+		String expected = "Cont\u00adinues the work by Dav\u00adid Tolp\u00adin. Spec\u00adif\u00adically, add\u00ading UTF-\u200b8 support for pattern f\u00adiles.";
 		assertEquals(expected, result);
 	} 
 	
@@ -90,10 +94,10 @@ public class HyphenatorTest {
 		int rightHyphenMin = 1;
 		
 		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
-		
-		System.out.println("Rule list for 'z':");
-		List list = hyphenator.getRuleSet().getList('z');
-		printList(list);
+	
+//		System.out.println("Rule list for 'z':");
+//		List list = hyphenator.getRuleSet().getList('z');
+//		printObject(list);
 		
 		final String inputPhrase = "Continues the work by David Tolpin. Specifically, adding UTF-8 support for pattern files.";
 		String result  = hyphenator.hyphenate(inputPhrase, leftHyphenMin, rightHyphenMin);
@@ -161,7 +165,9 @@ public class HyphenatorTest {
 		output.close();
 	}
 	
-	//// Helpers ///
+	//// Helpers (debugging) ///
+	
+	@SuppressWarnings("unused")
 	private void printList(List list) {
 		printList(list, 0);
 	}
@@ -171,35 +177,41 @@ public class HyphenatorTest {
 		
 		while (enumeration.hasMoreElements()) {
 			Object o = enumeration.nextElement();
-			
-			for (int i=0; i<level; i++) {
-				System.out.print("\t");
-			}
-			System.out.print(o.getClass().toString() + ": ");
-			
-			if(o instanceof List) {
-				System.out.println("( ");
-				printList((List)o, level + 1);
-				for (int i=0; i<level; i++) {
-					System.out.print("\t");
-				}
-				System.out.println(")");
-
-			} else if (o instanceof int[]){
-				System.out.print("[");
-				int[] ints = (int[]) o;
-				String separator = "";
-				for (int i : ints) {
-					System.out.print(separator + i);
-					separator = ", ";
-				}
-				System.out.println("]");
-			} else {
-				System.out.println(o.toString());
-			}
+			printObject(o, level);
 		}
 		
 	}
-
 	
+	@SuppressWarnings("unused")
+	private void printObject(final Object o) {
+		printObject(o, 0);
+	}
+	
+	private void printObject(final Object o, final int level) {
+		for (int i=0; i<level; i++) {
+			System.out.print("\t");
+		}
+		System.out.print(o.getClass().toString() + ": ");
+		
+		if(o instanceof List) {
+			System.out.println("( ");
+			printList((List)o, level + 1);
+			for (int i=0; i<level; i++) {
+				System.out.print("\t");
+			}
+			System.out.println(")");
+
+		} else if (o instanceof int[]){
+			System.out.print("[");
+			int[] ints = (int[]) o;
+			String separator = "";
+			for (int i : ints) {
+				System.out.print(separator + i);
+				separator = ", ";
+			}
+			System.out.println("]");
+		} else {
+			System.out.println(o.toString());
+		}
+	}
 }

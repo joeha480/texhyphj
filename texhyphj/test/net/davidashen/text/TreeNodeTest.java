@@ -1,11 +1,15 @@
 package net.davidashen.text;
 
+import net.davidashen.util.List;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.CoreMatchers.allOf;
 
 public class TreeNodeTest {
 
@@ -137,5 +141,61 @@ public class TreeNodeTest {
 	// TODO: Replace existing blank node with concrete node.
 	// TODO: Exception on (non-blank) duplicate
 
-	// TODO: Generate List structures for consumption in Hyphenator
+
+	@Test
+	public void canProduceListStructure() {
+		TreeNode root = TreeNode.createFromPattern("z");
+		root.createChildFromPattern("za1");
+
+		//Expected: ('z' [0,0] ('a' [0,0,1]) )
+		List list = root.toList();
+		assertThat("z rule", list.head(), allOf(instanceOf(Character.class), equalTo('z')));
+		assertArrayEquals("z rule", new int[]{0,0}, (int[])list.longTail().head());
+		assertThat("z list length", list.length(), equalTo(3));
+		
+		List za = (List)list.last();
+		assertThat("za rule", za.head(), allOf(instanceOf(Character.class), equalTo('a')));
+		assertArrayEquals(new int[]{0,0,1}, (int[])za.longTail().head());
+		assertThat("za list length", za.length(), equalTo(2));
+	}
+	
+	// TODO: How to handle edge case TreeNode.createRoot().toList();?
+	
+	
+	@Test
+	public void generatedListStructureWorksWithHyphenator() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("1own");
+		root.createChildFromPattern("v2e");
+		root.createChildFromPattern("la3");
+		
+		Scanner scanner = new TreeNodeScanner(root);
+		
+		Hyphenator hyphenator = new Hyphenator();
+		hyphenator.setRuleSet(scanner);
+		
+		String actual = hyphenator.hyphenate("The quick brown fox jumps over the lazy dog.");
+		String expected = "The quick br\u00adown fox jumps over the la\u00adzy dog.";
+		assertEquals(expected, actual);
+	}
+
+	public static class TreeNodeScanner implements Scanner  {
+		private final TreeNode rootNode;
+		
+		public TreeNodeScanner(TreeNode root) {
+			rootNode = root;
+		}
+		
+		public int[] getException(String word) {
+			return null;
+		}
+		
+		public List getList(int c) {
+			List list = new List();
+			if(rootNode.hasChild((char)c)){
+				list.snoc(rootNode.getChild((char)c).toList());
+			} 
+			return list;
+		}
+	}
 }

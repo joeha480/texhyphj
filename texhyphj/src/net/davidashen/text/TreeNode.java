@@ -3,6 +3,8 @@ package net.davidashen.text;
 import java.util.Hashtable;
 import java.util.Map;
 
+import net.davidashen.util.List;
+
 /**
  * Tree structure for representing hyphenation rules in a type safe manner.
  */
@@ -150,5 +152,19 @@ public class TreeNode {
 	 */
 	public boolean isBlank() {
 		return this.blank;
+	}
+
+	/**
+	 * Create texhyphj original (lisp like) List structure from node tree for consumption by Hypernator  
+	 */
+	public List toList() {
+		List list = new List();
+		list.snoc(new Character(getLastCharacter()));
+		list.snoc(getHyphenation());
+		
+		for(Character c : children.keySet()) {
+			list.snoc(children.get(c).toList());
+		}
+		return list;
 	}
 }
