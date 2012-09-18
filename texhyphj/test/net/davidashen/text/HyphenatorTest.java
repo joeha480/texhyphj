@@ -135,6 +135,42 @@ public class HyphenatorTest {
 		input.close();
 		expected.close();
 	}
+	
+	/**
+	 * Hyphenates a large file ('Swedish list of words') and hyphenated using a reference implementation,
+	 * and check that the behaviour has not changed when using the new utf-8 parser.   
+	 */
+	@Test
+	@Ignore //known to fail
+	public void useWithRealGrammerAndUTF8ComparisionFile() throws FileNotFoundException, IOException {
+		//u00ad is soft hyphen
+		Charset utf8 = Charset.forName("UTF-8");
+		
+		Hyphenator hyphenator = new Hyphenator();
+		Utf8TexParser parser = new Utf8TexParser();
+		RuleDefinition r = parser.parse(new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8));
+		hyphenator.setRuleSet(r);
+
+		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sv-dictionary-input.txt").openStream(), utf8);
+		LineNumberReader input = new LineNumberReader(reader);
+		
+		InputStreamReader reader2 = new InputStreamReader(this.getClass().getResource("resource-files/sv-dictionary-expected.txt").openStream(), utf8);
+		LineNumberReader expected = new LineNumberReader(reader2);
+		
+		String inputLine;
+		String expectedLine;
+		
+		int lineNumber = 1; 
+		while ((inputLine=input.readLine())!=null & (expectedLine=expected.readLine())!=null) {
+			String actualLine = hyphenator.hyphenate(inputLine);
+			assertEquals("Line #" + (lineNumber++), expectedLine, actualLine);
+		}
+		assertEquals(inputLine, null);
+		assertEquals(expectedLine, null);
+		
+		input.close();
+		expected.close();
+	}
 
 	/**
 	 * This generates a new file to use as expected result in the test 'useRealGrammerFile' above.

@@ -30,6 +30,9 @@ texhyphj/src/net/davidashen/util/List.java -text
 texhyphj/test/net/davidashen/text/HyphenatorTest.java -text
 texhyphj/test/net/davidashen/text/TreeNodeTest.java -text
 texhyphj/test/net/davidashen/text/Utf8TexParserTest.java -text
+texhyphj/test/net/davidashen/text/resource-files/hyph-sv-utf8.tex -text
 texhyphj/test/net/davidashen/text/resource-files/sherlock-expected.txt -text
 texhyphj/test/net/davidashen/text/resource-files/sherlock.txt -text
+texhyphj/test/net/davidashen/text/resource-files/sv-dictionary-expected.txt -text
+texhyphj/test/net/davidashen/text/resource-files/sv-dictionary-input.txt -text
 texhyphj/test/net/davidashen/text/resource-files/ushyph.tex -text
