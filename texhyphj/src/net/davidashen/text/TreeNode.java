@@ -85,6 +85,14 @@ public class TreeNode {
 	 * Create a node with hyphenation information.
 	 */
 	public TreeNode(String segment, int[] hyphenationData) {
+		if(segment.length() +1 != hyphenationData.length ) {
+			throw new IllegalArgumentException(
+					"Illegal lenght of hyphenation array for \'" +segment +"\'. " + 
+					"It should be " + (segment.length() +1) + " but was " + hyphenationData.length + "." 
+			
+			);
+		}
+		
 		this.segment = segment;
 		this.hyphenation = hyphenationData;
 		this.blank = false;
@@ -189,15 +197,19 @@ public class TreeNode {
 	 */
 	public List toList() {
 		List list = new List();
-		list.snoc(new Character(getLastCharacter()));
-		list.snoc(getHyphenation());
-		
+
+		if(!isRoot()) {
+			list.snoc(new Character(getLastCharacter()));
+			list.snoc(getHyphenation());
+		}	
+
 		//The List structures from the original implementation where in alphabetical order.
 		final ArrayList<TreeNode> childList = new ArrayList<TreeNode>(children.values());
 		Collections.sort(childList, CHILD_ORDER_COMPARATOR);
 		for(TreeNode c : childList) {
 			list.snoc(c.toList());
 		}
+		
 		return list;
 	}
 }

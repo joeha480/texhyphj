@@ -12,12 +12,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
-import java.util.LinkedList;
 
 import net.davidashen.util.List;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.empty;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -146,7 +143,7 @@ public class HyphenatorTest {
 	 * (This test is a lot faster than using the whole dictionary, but also less complete)  
 	 */
 	@Test
-	public void useWithUtf8TexParser() throws FileNotFoundException, IOException {
+	public void useWithUtf8TexParser() throws Exception {
 		//u00ad is soft hyphen
 		Charset utf8 = Charset.forName("UTF-8");
 		
@@ -172,7 +169,7 @@ public class HyphenatorTest {
 	 * This test takes roughly 15 seconds.
 	 */
 	@Test
-	public void useWithRealGrammerAndUTF8ComparisionFile() throws FileNotFoundException, IOException {
+	public void useWithRealGrammerAndUTF8ComparisionFile() throws Exception {
 		//u00ad is soft hyphen
 		Charset utf8 = Charset.forName("UTF-8");
 		

@@ -104,5 +104,25 @@ public class Utf8TexParserTest {
 				longestFirst.getPatternTree('b').describe()
 				);
 	}
+
+	@Test(expected=Utf8TexParser.TexParserException.class)
+	public void handleMissingStartBracket() throws Exception{
+		Utf8TexParser parser = new Utf8TexParser();
+		parser.parse("\\patterns foo bar baz}");
+	}
+
 	
+	@Test(expected=Utf8TexParser.TexParserException.class)
+	public void handleMissingEndingBracket() throws Exception{
+		Utf8TexParser parser = new Utf8TexParser();
+		parser.parse("\\patterns{foo bar baz");
+	}
+	
+
+	@Test(expected=Utf8TexParser.TexParserException.class)
+	public void handleCommentedOutEndingBracket() throws Exception{
+		Utf8TexParser parser = new Utf8TexParser();
+		parser.parse("\\patterns{foo bar baz %comment}");
+	}
+
 }

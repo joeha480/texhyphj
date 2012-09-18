@@ -22,7 +22,15 @@ public class TreeNodeTest {
 		assertThat("root segment", root.getSegment(), equalTo(""));
 	}
 
-	// TODO: Check that int[] is always one element longer than segment String.
+	@Test(expected = RuntimeException.class)
+	public void shouldNotAllowHyphenIntArrayToBeToShort() {
+		new TreeNode("short", new int[]{1,2,3,4,5});
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void shouldNotAllowHyphenIntArrayToBeToLong() {
+		new TreeNode("long", new int[]{1,2,3,4,5,6});
+	}
 
 	@Test
 	public void shouldHaveWeakestPossibleHyphenationByDefault() {
@@ -123,7 +131,7 @@ public class TreeNodeTest {
 		assertArrayEquals("hyphenation", new int[] { 0, 0, 1 }, za1.getHyphenation());
 	} 
 	
-	//TODO: Support control numbers higher than 9
+	//TODO: Support control numbers higher than 9?
 
 	
 	@Test 
@@ -181,9 +189,18 @@ public class TreeNodeTest {
 				root.getChild('z').toList().describe());
 	}
 
-	
-	// TODO: How to handle edge case TreeNode.createRoot().toList();?
-	
+	@Test
+	public void canProduceListStructureFromRoot() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("x1a");
+		root.createChildFromPattern("y2b");
+		root.createChildFromPattern("z3a");
+		root.createChildFromPattern("z4b");
+		
+		assertEquals(
+				"((x [0, 0] (a [0, 1, 0])) (y [0, 0] (b [0, 2, 0])) (z [0, 0] (a [0, 3, 0]) (b [0, 4, 0])))",
+				root.toList().describe());
+	}	
 	
 	@Test
 	public void generatedListStructureWorksWithHyphenator() {

@@ -8,6 +8,15 @@ import net.davidashen.util.*;
  * insert soft hyphens at all allowed locations uses TeX hyphenation tables
  */
 public class Hyphenator {
+	
+
+	//Hyphens from the wikipedia article: https://en.wikipedia.org/wiki/Hyphen#Unicode
+    public static final char HYPHEN =  '\u2010';
+    public static final char HYPHEN_MINUS = '\u002d';
+    public static final char SOFT_HYPHEN = '\u00ad';
+    public static final char NON_BREAKING_HYPHEN = '\u2011';
+	private static final char ZERO_WIDTH_SPACE = '\u200b';
+	
 	private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
 	private RuleDefinition ruleSet;
 
@@ -99,7 +108,6 @@ public class Hyphenator {
 	public String hyphenate(String phrase, int leftHyphenMin, int rightHyphenMin) {
 
 		// Check input
-		// TODO: Log this, should possibly never happen?
 		leftHyphenMin = Math.max(leftHyphenMin, 1);
 		rightHyphenMin = Math.max(rightHyphenMin, 1);
 
@@ -146,7 +154,7 @@ public class Hyphenator {
 								- rightHyphenMin; i++) {
 							hyphenatedPhraseChars[ihy++] = sourcePhraseChars[processedOffset++];
 							if (hyphenQualificationPoints[i] % 2 == 1)
-								hyphenatedPhraseChars[ihy++] = '\u00ad';
+								hyphenatedPhraseChars[ihy++] = SOFT_HYPHEN;
 						}
 						
 						for (int i = length - rightHyphenMin; i < length; i++){
@@ -163,15 +171,13 @@ public class Hyphenator {
 			} else {
 				if (Character.isLetter(sourcePhraseChars[ich])) {
 					processedOffset = ich;
-					inword = true; // jch remembers the start of the word
+					inword = true; // processedOffset remembers the start of the word
 				} else {
 					if (sourcePhraseChars[ich] == (char) 0)
 						break; // zero is a guard inserted earlier
 					hyphenatedPhraseChars[ihy++] = sourcePhraseChars[ich];
-					if (sourcePhraseChars[ich] == '\u002d' || sourcePhraseChars[ich] == '\u2010') { // dash
-																			// or
-																			// hyphen
-						hyphenatedPhraseChars[ihy++] = '\u200b'; // zero-width space
+					if (sourcePhraseChars[ich] == HYPHEN_MINUS || sourcePhraseChars[ich] == HYPHEN) { 
+						hyphenatedPhraseChars[ihy++] = ZERO_WIDTH_SPACE; 
 					}
 				}
 				ich++;
@@ -211,6 +217,7 @@ public class Hyphenator {
 	 *            Length of the word (excluding '.' characters)
 	 * @return hyphen qualification points for the word
 	 */
+	@SuppressWarnings("rawtypes")
 	private int[] applyHyphenationRules(final char[] wordChars, final int length) {
 		int[] hyphenQualificationPoints = new int[wordChars.length + 1];
 
