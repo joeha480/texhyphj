@@ -141,8 +141,8 @@ public class TreeNodeTest {
 	// TODO: Replace existing blank node with concrete node.
 	// TODO: Exception on (non-blank) duplicate
 
-
 	@Test
+	@SuppressWarnings("unchecked")
 	public void canProduceListStructure() {
 		TreeNode root = TreeNode.createFromPattern("z");
 		root.createChildFromPattern("za1");
@@ -169,7 +169,7 @@ public class TreeNodeTest {
 		root.createChildFromPattern("v2e");
 		root.createChildFromPattern("la3");
 		
-		Scanner scanner = new TreeNodeScanner(root);
+		RuleDefinition scanner = new TreeNodeScanner(root);
 		
 		Hyphenator hyphenator = new Hyphenator();
 		hyphenator.setRuleSet(scanner);
@@ -179,7 +179,7 @@ public class TreeNodeTest {
 		assertEquals(expected, actual);
 	}
 
-	public static class TreeNodeScanner implements Scanner  {
+	public static class TreeNodeScanner implements RuleDefinition  {
 		private final TreeNode rootNode;
 		
 		public TreeNodeScanner(TreeNode root) {
@@ -190,7 +190,7 @@ public class TreeNodeTest {
 			return null;
 		}
 		
-		public List getList(int c) {
+		public List getPatternTree(int c) {
 			List list = new List();
 			if(rootNode.hasChild((char)c)){
 				list.snoc(rootNode.getChild((char)c).toList());

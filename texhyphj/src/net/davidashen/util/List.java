@@ -2,6 +2,8 @@
 
 package net.davidashen.util;
 
+import java.util.Enumeration;
+
 /** Lispish list. 
 Not very lispish, but still...
 The compromise is that some of operations are
@@ -267,6 +269,46 @@ public class List implements Cloneable {
     length+=l.length;
     return this;
   }
+  
+  /**
+   * Transform List to a human readable string (useful in testing and debugging).
+   */
+  public String describe() {
+	  StringBuffer buffer = new StringBuffer();
+	  describe(buffer);
+	  return buffer.toString();
+  }
+  
+	private void describe(StringBuffer buffer) {
+		buffer.append("(");
+
+	  	String elementSeparator = "";
+		Enumeration enumeration = elements();
+		while (enumeration.hasMoreElements()) {
+			Object o = enumeration.nextElement();
+
+			//Separate elements by space (Java does not support join)
+			buffer.append(elementSeparator);
+	  		elementSeparator = " ";
+
+	  		if(o instanceof List) {
+				((List)o).describe(buffer);
+			} else if (o instanceof int[]){
+				buffer.append("[");
+				int[] ints = (int[]) o;
+				String intSeparator = "";
+				for (int i : ints) {
+					buffer.append(intSeparator + i);
+					intSeparator = ", ";
+				}
+				buffer.append("]");
+			} else {
+				buffer.append(o.toString());
+			}
+		}
+		buffer.append(")");
+  }
+  
 
   public String toString() {
 	  return isPair()?longTail().addToString(head().toString()):"()";

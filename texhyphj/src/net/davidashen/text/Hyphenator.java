@@ -9,7 +9,7 @@ import net.davidashen.util.*;
  */
 public class Hyphenator {
 	private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
-	private Scanner ruleSet;
+	private RuleDefinition ruleSet;
 
 	/**
 	 * creates an uninitialized instance of Hyphenator. The same instance can be
@@ -18,11 +18,11 @@ public class Hyphenator {
 	public Hyphenator() {
 	}
 
-	public Scanner getRuleSet() {
+	public RuleDefinition getRuleSet() {
 		return ruleSet;
 	}
 
-	public void setRuleSet(Scanner scanner) {
+	public void setRuleSet(RuleDefinition scanner) {
 		this.ruleSet = scanner;
 	}
 
@@ -215,7 +215,7 @@ public class Hyphenator {
 		int[] hyphenQualificationPoints = new int[wordChars.length + 1];
 
 		for (int istart = 0; istart < length; istart++) {
-			List rules = ruleSet.getList((int) wordChars[istart]);
+			List rules = ruleSet.getPatternTree((int) wordChars[istart]);
 			int i = istart;
 
 			java.util.Enumeration rulesEnumeration = rules.elements();

@@ -20,14 +20,16 @@ texhyphj/run-tests.xml -text
 texhyphj/src/net/davidashen/text/ByteScanner.java -text
 texhyphj/src/net/davidashen/text/Hyphenator.java -text
 texhyphj/src/net/davidashen/text/HyphenatorUI.java -text
-texhyphj/src/net/davidashen/text/Scanner.java -text
+texhyphj/src/net/davidashen/text/RuleDefinition.java -text
 texhyphj/src/net/davidashen/text/TreeNode.java -text
+texhyphj/src/net/davidashen/text/Utf8TexParser.java -text
 texhyphj/src/net/davidashen/util/Applicator.java -text
 texhyphj/src/net/davidashen/util/ErrorHandler.java -text
 texhyphj/src/net/davidashen/util/Hashtable.java -text
 texhyphj/src/net/davidashen/util/List.java -text
 texhyphj/test/net/davidashen/text/HyphenatorTest.java -text
 texhyphj/test/net/davidashen/text/TreeNodeTest.java -text
+texhyphj/test/net/davidashen/text/Utf8TexParserTest.java -text
 texhyphj/test/net/davidashen/text/resource-files/sherlock-expected.txt -text
 texhyphj/test/net/davidashen/text/resource-files/sherlock.txt -text
 texhyphj/test/net/davidashen/text/resource-files/ushyph.tex -text

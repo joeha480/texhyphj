@@ -1,7 +1,6 @@
 package net.davidashen.text;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,14 +23,14 @@ public class HyphenatorTest {
 	@Test
 	public void simplestPossibleTest() {
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.setRuleSet(new Scanner() {
+		hyphenator.setRuleSet(new RuleDefinition() {
 
 			public int[] getException(String word) {
 				//No exceptions
 				return null;
 			}
 
-			public List getList(int c) {
+			public List getPatternTree(int c) {
 				return new List();
 			}
 		});
@@ -47,7 +46,7 @@ public class HyphenatorTest {
 	@Test
 	public void singleRule() {
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.setRuleSet(new Scanner() {
+		hyphenator.setRuleSet(new RuleDefinition() {
 
 			public int[] getException(String word) {
 				//No exceptions
@@ -57,7 +56,7 @@ public class HyphenatorTest {
 			/**
 			 * Returns a rules wrapped in an outer list.
 			 */
-			public List getList(int c) {
+			public List getPatternTree(int c) {
 				List outerList = new List();
 				List innerList = new List();
 				innerList.snoc(new Character('i'));
@@ -172,6 +171,7 @@ public class HyphenatorTest {
 		printList(list, 0);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private void printList(final List list, final int level) {
 		Enumeration enumeration = list.elements();
 		

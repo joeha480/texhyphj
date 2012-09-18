@@ -7,7 +7,7 @@ import net.davidashen.util.Hashtable;
 import net.davidashen.util.List;
 
 /* parser for TeX hyphenation tables */
-class ByteScanner implements Scanner {
+class ByteScanner implements RuleDefinition {
 	final static short EOF = 0, LBRAC = 1, RBRAC = 2, PATTERNS = 3, EXCEPTIONS = 4, PATTERN = 5;
 	
 	private final ErrorHandler eh;
@@ -139,7 +139,7 @@ class ByteScanner implements Scanner {
 		return (int[])exceptions.get(word);
 	}
 	
-	public List getList(int c) {
+	public List getPatternTree(int c) {
 		return entrytab[c % 256];
 	}
 
