@@ -10,7 +10,9 @@ import java.util.Map;
 import net.davidashen.util.List;
 
 /**
- * Parses .tex files into sets of hyphenation patterns and exceptions. 
+ * Parses .tex files into sets of hyphenation patterns and exceptions.
+ * 
+ *  TODO: Throw own ParserException, not IOException
  */
 public class Utf8TexParser {
 	
@@ -24,7 +26,11 @@ public class Utf8TexParser {
 		 
 		int c = reader.read();
 		while( c > -1) {
-			if( ((char)c) =='\\' ) {
+			char ch =(char)c;
+			
+			if(isStartOfComment(ch)) {
+				ignoresRestOfLine(reader);
+			} else if(ch == '\\') {
 				String groupName = parseGroupName(reader);
 				
 				if(groupName.equals("patterns")) {
@@ -40,8 +46,7 @@ public class Utf8TexParser {
 				} else {
 					throw new RuntimeException("Unknown keyword \'" + groupName + "\'");
 				}
-			}
-			
+			}	
 			c = reader.read();
 		}
 
@@ -55,7 +60,11 @@ public class Utf8TexParser {
 		//Read up until the next '{'
 		int c = reader.read();
 		while( c > -1 && ((char)c) != '{' ) {
-			buffer.append((char)c);
+			if(isStartOfComment((char)c)) {
+				ignoresRestOfLine(reader);
+			} else {
+				buffer.append((char)c);
+			}
 			c = reader.read();
 		}
  
@@ -73,13 +82,18 @@ public class Utf8TexParser {
 		int c = reader.read();
 		while( c > -1 &&  (char)c != '}') {
 			char ch = (char) c;
+			
 			if(Character.isWhitespace(ch)) {
 				if(buffer.length()>0) {
 				list.add(buffer.toString());
 				}
 				buffer  = new StringBuffer();
 			} else {
-				buffer.append(ch);
+				if(isStartOfComment(ch)) {
+					ignoresRestOfLine(reader);
+				} else  {
+					buffer.append(ch);
+				}
 			}
 			c = reader.read();
 		}
@@ -126,10 +140,34 @@ public class Utf8TexParser {
 
 		return trimmedHyphenations;
 	}
+
+
+	/**
+	 * Is this character the start of a comment? 
+	 * 
+	 */
+	private static boolean isStartOfComment(char c) {
+		return c == '%';
+	}
+
+	/**
+	 * Read until the end of the line, including the new line character. 
+	 * 
+	 * @param reader to fast forward through
+	 */
+	private static void ignoresRestOfLine(Reader reader) throws IOException {
+		int c = reader.read();
+		while(c != -1 && (char)c != '\n') {
+			c = reader.read();
+		}
+	}
+
+
 	
 	private static class TreeNodeScanner implements RuleDefinition {
 		final private TreeNode rulesRoot;
 		final private Map<String, int[]> exceptions;
+		final private Map<Character, net.davidashen.util.List> listCache = new Hashtable<Character, List>();
 		
 		public TreeNodeScanner(TreeNode root, Map<String, int[]> exceptions) {
 			this.rulesRoot = root;
@@ -141,13 +179,21 @@ public class Utf8TexParser {
 		}
 
 		public List getPatternTree(int c) {
-			net.davidashen.util.List list = new net.davidashen.util.List();
+			char ch = (char) c;
 			
-			if(rulesRoot.hasChild((char)c)){
-				list.snoc( rulesRoot.getChild((char)c).toList());
+			if(listCache.containsKey(ch)) {
+				return listCache.get(ch);
+			} else {
+				//List creation is relatively heavy, so let's only do it once per character.
+				net.davidashen.util.List list = new net.davidashen.util.List();
+				
+				if(rulesRoot.hasChild(ch)){
+					list.snoc( rulesRoot.getChild(ch).toList());
+				}
+				
+				listCache.put(ch, list);
+				return list;
 			}
-			
-			return list;
 		}
 	}
 }

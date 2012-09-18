@@ -138,7 +138,16 @@ public class TreeNodeTest {
 				child.getHyphenation());
 	}
 	
-	// TODO: Replace existing blank node with concrete node.
+	@Test 
+	public void shouldReplacePlaceholderNode() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("f2oo");
+		root.createChildFromPattern("1f");
+		
+		assertEquals("(f [1, 0] (o [0, 0, 0] (o [0, 2, 0, 0])))",
+				root.getChild('f').toList().describe());
+	}
+	
 	// TODO: Exception on (non-blank) duplicate
 
 	@Test
@@ -158,6 +167,20 @@ public class TreeNodeTest {
 		assertArrayEquals(new int[]{0,0,1}, (int[])za.longTail().head());
 		assertThat("za list length", za.length(), equalTo(2));
 	}
+
+	@Test
+	public void listStructureWithALphabeticalOrder() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("z1b");
+		root.createChildFromPattern("z1a");
+		root.createChildFromPattern("z1d");
+		root.createChildFromPattern("z1c");
+		
+		assertEquals(
+				"(z [0, 0] (a [0, 1, 0]) (b [0, 1, 0]) (c [0, 1, 0]) (d [0, 1, 0]))",
+				root.getChild('z').toList().describe());
+	}
+
 	
 	// TODO: How to handle edge case TreeNode.createRoot().toList();?
 	
@@ -178,6 +201,7 @@ public class TreeNodeTest {
 		String expected = "The quick br\u00adown fox jumps over the la\u00adzy dog.";
 		assertEquals(expected, actual);
 	}
+	
 
 	public static class TreeNodeScanner implements RuleDefinition  {
 		private final TreeNode rootNode;

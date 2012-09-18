@@ -12,9 +12,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.LinkedList;
 
 import net.davidashen.util.List;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.empty;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -135,21 +138,50 @@ public class HyphenatorTest {
 		input.close();
 		expected.close();
 	}
+
+	
+	/**
+	 * Check some samples lines with words from sv-dictionary-expected.txt
+	 * 
+	 * (This test is a lot faster than using the whole dictionary, but also less complete)  
+	 */
+	@Test
+	public void useWithUtf8TexParser() throws FileNotFoundException, IOException {
+		//u00ad is soft hyphen
+		Charset utf8 = Charset.forName("UTF-8");
+		
+		Hyphenator hyphenator = new Hyphenator();
+		Utf8TexParser parser = new Utf8TexParser();
+		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8);
+		RuleDefinition r = parser.parse(ruleFileReader);
+		hyphenator.setRuleSet(r);
+		ruleFileReader.close();
+
+		assertHyphenation(hyphenator, "Blom­mi­ga­re bön­der en­vi­sa­des med att styv­fas­ter in-te rag-lar på torg.");
+		assertHyphenation(hyphenator, "Kall-pra-ta om te­ma­in­rik­ta­de kon­junk­tur­väx­ling­ar med män-ni-sko-rätts-ak-ti-vis-ter.");
+		assertHyphenation(hyphenator, "Röst­be­rät­ti­ga­de tvil­ling­föds­lar re­sul­te­rar i re­ha­bi­li­te­rings­pla­ne­ring.");
+	}
+	
+	
+
 	
 	/**
 	 * Hyphenates a large file ('Swedish list of words') and hyphenated using a reference implementation,
 	 * and check that the behaviour has not changed when using the new utf-8 parser.   
+	 * 
+	 * This test takes roughly 15 seconds.
 	 */
 	@Test
-	@Ignore //known to fail
 	public void useWithRealGrammerAndUTF8ComparisionFile() throws FileNotFoundException, IOException {
 		//u00ad is soft hyphen
 		Charset utf8 = Charset.forName("UTF-8");
 		
 		Hyphenator hyphenator = new Hyphenator();
 		Utf8TexParser parser = new Utf8TexParser();
-		RuleDefinition r = parser.parse(new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8));
+		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8);
+		RuleDefinition r = parser.parse(ruleFileReader);
 		hyphenator.setRuleSet(r);
+		ruleFileReader.close();
 
 		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sv-dictionary-input.txt").openStream(), utf8);
 		LineNumberReader input = new LineNumberReader(reader);
@@ -162,8 +194,12 @@ public class HyphenatorTest {
 		
 		int lineNumber = 1; 
 		while ((inputLine=input.readLine())!=null & (expectedLine=expected.readLine())!=null) {
-			String actualLine = hyphenator.hyphenate(inputLine);
+			String actualLine = hyphenator.hyphenate(inputLine, 2,2);
 			assertEquals("Line #" + (lineNumber++), expectedLine, actualLine);
+			
+			if(lineNumber % 50000 == 0) {
+				System.out.println("Line #" + (lineNumber) + ": " + actualLine);
+			}
 		}
 		assertEquals(inputLine, null);
 		assertEquals(expectedLine, null);
@@ -201,6 +237,16 @@ public class HyphenatorTest {
 	}
 	
 	//// Helpers (debugging) ///
+
+	/**
+	 * Remove all hard hyphens, then hyphenate and assert that soft hyphens have 
+	 * appeared where the hard hyphens used to be.  
+	 */
+	private void assertHyphenation(Hyphenator hyphenator, String hyphenatedText) {
+		String input = hyphenatedText.replace("-", "");
+		String expected = hyphenatedText.replace("-", "\u00ad");
+		assertEquals(expected, hyphenator.hyphenate(input, 2, 2));
+	}
 	
 	@SuppressWarnings("unused")
 	private void printList(List list) {

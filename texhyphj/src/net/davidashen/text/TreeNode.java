@@ -1,5 +1,8 @@
 package net.davidashen.text;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -14,6 +17,18 @@ public class TreeNode {
 	final private boolean blank;
 	final private Map<Character, TreeNode> children = new Hashtable<Character, TreeNode>();
 
+	final private static Comparator<TreeNode> CHILD_ORDER_COMPARATOR = new Comparator<TreeNode>() {
+		public int compare(TreeNode o1, TreeNode o2) {
+			if( o1.getLastCharacter() > o2.getLastCharacter()) {
+				return 1;
+			} else if (o1.getLastCharacter() < o2.getLastCharacter())  {
+				return -1;
+			} else {
+				return 0;
+			}
+		}
+	};
+	
 	/**
 	 * Create a root node to create all other nodes inside.
 	 */
@@ -94,7 +109,13 @@ public class TreeNode {
 		TreeNode node = new TreeNode(segment, hyphenation);
 
 		if (segment.length() == this.segment.length() + 1) {
-			children.put(segment.charAt(segment.length() - 1), node);
+			final char keyChar = segment.charAt(segment.length() - 1);
+			
+			if(children.containsKey(keyChar)) {
+				node.copyChildren(children.get(keyChar));
+			}
+				
+			children.put(keyChar, node);
 		} else {
 			final char keyCharacter = segment.charAt(this.segment.length());
 			if(!hasChild(keyCharacter)){
@@ -103,7 +124,16 @@ public class TreeNode {
 			getChild(keyCharacter).createChild(segment, hyphenation);
 		}
 	}
-	
+
+	/**
+	 * Copy all children from another node.
+	 */
+	private void copyChildren(TreeNode source) {
+		for(char c : source.children.keySet() ) {
+			this.children.put(c, source.getChild(c));
+		}
+	}
+
 	/**
 	 * Add place holder node required by tree structure. 
 	 */
@@ -162,8 +192,11 @@ public class TreeNode {
 		list.snoc(new Character(getLastCharacter()));
 		list.snoc(getHyphenation());
 		
-		for(Character c : children.keySet()) {
-			list.snoc(children.get(c).toList());
+		//The List structures from the original implementation where in alphabetical order.
+		final ArrayList<TreeNode> childList = new ArrayList<TreeNode>(children.values());
+		Collections.sort(childList, CHILD_ORDER_COMPARATOR);
+		for(TreeNode c : childList) {
+			list.snoc(c.toList());
 		}
 		return list;
 	}
