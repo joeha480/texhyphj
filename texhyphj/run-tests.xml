@@ -26,6 +26,7 @@
 		</fileset>
 		<fileset dir="${lib.dir}">
 			<include name="junit*.jar"/>
+			<include name="hamcrest*.jar"/>
 		</fileset>
 		<fileset dir="${ant-output.dir}">
 			<include name="${tests-jar.name}"/>
@@ -60,6 +61,7 @@
 				</fileset>
 				<fileset dir="${lib.dir}">
 					<include name="junit*.jar"/>
+					<include name="hamcrest*.jar"/>
 				</fileset>
 			</classpath>
 	    </javac>
