@@ -27,6 +27,7 @@ texhyphj/src/net/davidashen/util/Applicator.java -text
 texhyphj/src/net/davidashen/util/ErrorHandler.java -text
 texhyphj/src/net/davidashen/util/Hashtable.java -text
 texhyphj/src/net/davidashen/util/List.java -text
+texhyphj/src/net/davidashen/util/LoggingErrorHandler.java -text
 texhyphj/test/net/davidashen/text/HyphenatorTest.java -text
 texhyphj/test/net/davidashen/text/TreeNodeTest.java -text
 texhyphj/test/net/davidashen/text/Utf8TexParserTest.java -text

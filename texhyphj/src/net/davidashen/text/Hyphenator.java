@@ -2,13 +2,16 @@
 
 package net.davidashen.text;
 
+import java.io.Reader;
+import java.util.logging.Logger;
+
+import net.davidashen.text.Utf8TexParser.TexParserException;
 import net.davidashen.util.*;
 
 /**
  * insert soft hyphens at all allowed locations uses TeX hyphenation tables
  */
 public class Hyphenator {
-	
 
 	//Hyphens from the wikipedia article: https://en.wikipedia.org/wiki/Hyphen#Unicode
     public static final char HYPHEN =  '\u2010';
@@ -17,14 +20,17 @@ public class Hyphenator {
     public static final char NON_BREAKING_HYPHEN = '\u2011';
 	private static final char ZERO_WIDTH_SPACE = '\u200b';
 	
-	private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
+	private final ForwardingErrorHandler errorHandler;
 	private RuleDefinition ruleSet;
+	private final ByteScanner b;
 
 	/**
 	 * creates an uninitialized instance of Hyphenator. The same instance can be
 	 * reused for different hyphenation tables.
 	 */
 	public Hyphenator() {
+		errorHandler = new ForwardingErrorHandler(new LoggingErrorHandler(Logger.getLogger(this.getClass().getCanonicalName())));
+		b = new ByteScanner(errorHandler);
 	}
 
 	public RuleDefinition getRuleSet() {
@@ -36,7 +42,7 @@ public class Hyphenator {
 	}
 
 	public ErrorHandler getErrorHandler() {
-		return errorHandler;
+		return errorHandler.getTarget();
 	}
 
 	/**
@@ -47,9 +53,25 @@ public class Hyphenator {
 	 * @see net.davidashen.util.ErrorHandler
 	 */
 	public void setErrorHandler(ErrorHandler eh) {
-		this.errorHandler = eh;
+		errorHandler.setTarget(eh);
 	}
 
+	/**
+	 * <p>Loads a hyphenation table with a reader. This enables the use of UTF-8 pattern files.
+	 * Note that escape codes in the original tex-files are not supported, e.g. ^^f6.
+	 * This method also differs in that multiple calls to loadTable are not joined, only the 
+	 * most recent pattern file is used.</p>
+	 * 
+	 * <p>Only "\pattern{" and "\hyphenation{" groups are supported.</p>
+	 * 
+	 * @param reader a reader containing hyphenation patterns (most likely a file)
+	 * @throws TexParserException if there are problems reading the input
+	 */
+	public void loadTable(Reader reader) throws TexParserException {
+		Utf8TexParser parser = new Utf8TexParser();
+		ruleSet = parser.parse(reader);
+	}
+	
 	/**
 	 * loads hyphenation table
 	 * 
@@ -77,7 +99,6 @@ public class Hyphenator {
 	 */
 	public void loadTable(java.io.InputStream in, int[] codelist)
 			throws java.io.IOException {
-		ByteScanner b = new ByteScanner(errorHandler);
 		b.scan(in, codelist);
 		ruleSet = b;
 	}
@@ -258,6 +279,41 @@ public class Hyphenator {
 		return hyphenQualificationPoints;
 	}
 
+	private class ForwardingErrorHandler implements ErrorHandler {
+		private ErrorHandler target;
+		
+		public ForwardingErrorHandler(ErrorHandler target) {
+			this.target = target;
+		}
+
+		public ErrorHandler getTarget() {
+			return target;
+		}
+
+		public void setTarget(ErrorHandler target) {
+			this.target = target;
+		}
+
+		public void debug(String domain, String message) {
+			target.debug(domain, message);
+		}
+	
+		public void info(String s) {
+			target.info(s);
+		}
+	
+		public void warning(String s) {
+			target.warning(s);
+		}
+	
+		public void error(String s) {
+			target.error(s);
+		}
+	
+		public void exception(String s, Exception e) {
+			target.exception(s, e);
+		}
+	}
 
 }
 

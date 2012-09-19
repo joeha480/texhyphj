@@ -26,7 +26,7 @@ class ByteScanner implements RuleDefinition {
 		return (c0 << 8) + c1;
 	}
 
-	ByteScanner(ErrorHandler eh) throws java.io.IOException {
+	ByteScanner(ErrorHandler eh) {
 		exceptions = new Hashtable();
 		entrytab = new List[256];
 		for (int i = 0; i != 256; ++i) {
