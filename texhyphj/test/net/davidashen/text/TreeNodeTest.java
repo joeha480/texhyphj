@@ -1,17 +1,44 @@
 package net.davidashen.text;
 
-import net.davidashen.util.List;
-
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.CoreMatchers.allOf;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import java.util.LinkedList;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
+import net.davidashen.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class TreeNodeTest {
+	private static Logger log;
+	private static TreeNodeTest.EavesdroppingLogHandler logHandler; 
+	
+	@Before
+	public  void enableLogHandler() {
+		log = Logger.getLogger(TreeNode.class.getCanonicalName());
+		logHandler = new EavesdroppingLogHandler();
+		log.addHandler(logHandler);
+	}
+	
+	@After
+	public void disableLogHandler(){
+		log.removeHandler(logHandler);
+	}
+	
+	//// Tests ////
 
 	@Test
 	public void rootNodeHaAnEmptySegment() {
@@ -130,10 +157,22 @@ public class TreeNodeTest {
 		assertEquals("node segment", "za", za1.getSegment());
 		assertArrayEquals("hyphenation", new int[] { 0, 0, 1 }, za1.getHyphenation());
 	} 
-	
-	//TODO: Support control numbers higher than 9?
 
-	
+	/**
+	 * Log cases where there is more than one digit of hyphenation between two characters.
+	 * This may be a sign of an incorrect patterns file.
+	 */
+	@Test 
+	public void logWarningIfHyphenationIsHigherThan9() {
+		log.setLevel(Level.WARNING);
+		
+		TreeNode zb = TreeNode.createFromPattern("z12b");
+		assertEquals("node segment", "zb", zb.getSegment());
+		assertArrayEquals("hyphenation", new int[] { 0, 12, 0 }, zb.getHyphenation());
+		
+		assertThat(logHandler.records, hasItem(hasProperty("message", containsString("z12b"))));
+	} 
+
 	@Test 
 	public void thatChildNodeCanBeCreatedFromPattern() {
 		TreeNode root = TreeNode.createRoot();
@@ -155,8 +194,25 @@ public class TreeNodeTest {
 		assertEquals("(f [1, 0] (o [0, 0, 0] (o [0, 2, 0, 0])))",
 				root.getChild('f').toList().describe());
 	}
-	
-	// TODO: Exception on (non-blank) duplicate
+
+
+	/**
+	 * Log warning on duplicate node.
+	 * This may be a sign of an incorrect patterns file.
+	 */
+	@Test 
+	@SuppressWarnings("unchecked")
+	public void shouldWarnOnDuplicateNode() {
+		TreeNode root = TreeNode.createRoot();
+		root.createChildFromPattern("f1oo");
+		root.createChildFromPattern("f2oo");
+		
+		assertEquals("(f [0, 0] (o [0, 0, 0] (o [0, 2, 0, 0])))",
+				root.getChild('f').toList().describe());
+
+		assertThat(logHandler.records, hasItem(hasProperty("message", allOf(containsString("f1oo"), containsString("f2oo")))));
+	}
+
 
 	@Test
 	@SuppressWarnings("unchecked")
@@ -239,4 +295,20 @@ public class TreeNodeTest {
 			return list;
 		}
 	}
+
+	public class EavesdroppingLogHandler extends Handler {
+		private java.util.List<Object> records =new LinkedList<Object>();
+
+		@Override
+		public void publish(LogRecord record) {
+			records.add(record);
+		}
+
+		@Override
+		public void flush() {/* Do nothing*/}
+
+		@Override
+		public void close() throws SecurityException { /* Do nothing */	}
+	}
+
 }

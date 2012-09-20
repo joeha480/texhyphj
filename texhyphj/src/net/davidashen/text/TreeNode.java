@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.davidashen.util.List;
 
@@ -12,12 +13,13 @@ import net.davidashen.util.List;
  * Tree structure for representing hyphenation rules in a type safe manner.
  */
 public class TreeNode {
-	final private String segment;
-	final private int[] hyphenation;
-	final private boolean blank;
-	final private Map<Character, TreeNode> children = new Hashtable<Character, TreeNode>();
+	private static final Logger log = Logger.getLogger(TreeNode.class.getCanonicalName()); 
+	private final  String segment;
+	private final int[] hyphenation;
+	private final boolean blank;
+	private final Map<Character, TreeNode> children = new Hashtable<Character, TreeNode>();
 
-	final private static Comparator<TreeNode> CHILD_ORDER_COMPARATOR = new Comparator<TreeNode>() {
+	private final static Comparator<TreeNode> CHILD_ORDER_COMPARATOR = new Comparator<TreeNode>() {
 		public int compare(TreeNode o1, TreeNode o2) {
 			if( o1.getLastCharacter() > o2.getLastCharacter()) {
 				return 1;
@@ -43,16 +45,26 @@ public class TreeNode {
 		char[] patternChars = pattern.toCharArray();
 
 		int characterCount = 0;
+		boolean largeHyphenation = false;
 		char[] segmentChars = new char[patternChars.length]; 
 		int[] hyphenations = new int[patternChars.length+1];
 		
-		
 		for (char c : patternChars) {
 			if(Character.isDigit(c)) {
-				hyphenations[characterCount] = Integer.parseInt("" +  c);
+				hyphenations[characterCount] = hyphenations[characterCount]  * 10 +  Integer.parseInt("" +  c);
+				
+				if(hyphenations[characterCount] >9 ){
+					largeHyphenation = true;
+				}
 			} else {
 				segmentChars[characterCount++] = c;
 			}
+		}
+		
+
+		if(largeHyphenation) {
+			final String msg = "Pattern \' " + pattern+ " \' contained a hyphernation larger than 9.";
+			log.warning(msg);
 		}
 		
 		return new TreeNode(
@@ -114,16 +126,23 @@ public class TreeNode {
 					+ "\' to parent \'" + this.segment + "\'");
 		}
 
-		TreeNode node = new TreeNode(segment, hyphenation);
+		TreeNode newNode = new TreeNode(segment, hyphenation);
 
 		if (segment.length() == this.segment.length() + 1) {
 			final char keyChar = segment.charAt(segment.length() - 1);
 			
 			if(children.containsKey(keyChar)) {
-				node.copyChildren(children.get(keyChar));
+				final TreeNode existingNode = children.get(keyChar);
+				if(!existingNode.isBlank()) {
+					final String msg = 
+							"Duplicate pattern. Pattern \'" +existingNode.getPattern() + "\' will be replaced by \'" + newNode.getPattern()+ "\'.";
+					log.warning(msg);
+
+				}
+				newNode.copyChildren(existingNode);
 			}
 				
-			children.put(keyChar, node);
+			children.put(keyChar, newNode);
 		} else {
 			final char keyCharacter = segment.charAt(this.segment.length());
 			if(!hasChild(keyCharacter)){
@@ -170,6 +189,18 @@ public class TreeNode {
 		return hyphenation;
 	}
 
+	public String getPattern() {
+		StringBuffer pattern = new StringBuffer();
+		
+		for(int i =0; i < segment.length(); i++) {
+			pattern.append(hyphenation[i]);
+			pattern.append(segment.charAt(i));
+		}
+		pattern.append(hyphenation[segment.length()]);
+		
+		return pattern.toString();
+	}
+	
 	public boolean hasChild(char c) {
 		return children.containsKey(c);
 	}
