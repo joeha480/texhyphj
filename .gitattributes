@@ -16,6 +16,7 @@ texhyphj/doc/LICENSE -text
 texhyphj/doc/README -text
 texhyphj/lib/hamcrest-all-1.3.jar -text
 texhyphj/lib/junit-4.7.jar -text
+texhyphj/pom.xml -text
 texhyphj/run-tests.xml -text
 texhyphj/src/net/davidashen/text/ByteScanner.java -text
 texhyphj/src/net/davidashen/text/Hyphenator.java -text
