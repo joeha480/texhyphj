@@ -32,9 +32,9 @@ texhyphj/src/main/java/net/davidashen/util/LoggingErrorHandler.java -text
 texhyphj/src/test/java/net/davidashen/text/HyphenatorTest.java -text
 texhyphj/src/test/java/net/davidashen/text/TreeNodeTest.java -text
 texhyphj/src/test/java/net/davidashen/text/Utf8TexParserTest.java -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/hyph-sv-utf8.tex -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/sherlock-expected.txt -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/sherlock.txt -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/sv-dictionary-expected.txt -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/sv-dictionary-input.txt -text
-texhyphj/src/test/java/net/davidashen/text/resource-files/ushyph.tex -text
+texhyphj/src/test/resources/hyph-sv-utf8.tex -text
+texhyphj/src/test/resources/sherlock-expected.txt -text
+texhyphj/src/test/resources/sherlock.txt -text
+texhyphj/src/test/resources/sv-dictionary-expected.txt -text
+texhyphj/src/test/resources/sv-dictionary-input.txt -text
+texhyphj/src/test/resources/ushyph.tex -text

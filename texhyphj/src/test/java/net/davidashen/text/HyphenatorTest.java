@@ -77,7 +77,7 @@ public class HyphenatorTest {
 		Hyphenator hyphenator = new Hyphenator();
 		
 		
-		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
+		hyphenator.loadTable(this.getClass().getResource("/ushyph.tex").openStream());
 		
 		String result  = hyphenator.hyphenate("Continues the work by David Tolpin. Specifically, adding UTF-8 support for pattern files.");
 		String expected = "Con\u00adtin\u00adues the work by David Tolpin. Specif\u00adi\u00adcal\u00adly, adding UT\u00adF-\u200b8 sup\u00adport for pat\u00adtern files.";
@@ -92,7 +92,7 @@ public class HyphenatorTest {
 		int leftHyphenMin = 4;
 		int rightHyphenMin = 1;
 		
-		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
+		hyphenator.loadTable(this.getClass().getResource("/ushyph.tex").openStream());
 	
 //		System.out.println("Rule list for 'z':");
 //		List list = hyphenator.getRuleSet().getList('z');
@@ -112,13 +112,13 @@ public class HyphenatorTest {
 	public void useWithRealGrammerAndComparisionFile() throws FileNotFoundException, IOException {
 		//u00ad is soft hyphen
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
+		hyphenator.loadTable(this.getClass().getResource("/ushyph.tex").openStream());
 		Charset utf8 = Charset.forName("UTF-8");
 		
-		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sherlock.txt").openStream(), utf8);
+		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("/sherlock.txt").openStream(), utf8);
 		LineNumberReader input = new LineNumberReader(reader);
 		
-		InputStreamReader reader2 = new InputStreamReader(this.getClass().getResource("resource-files/sherlock-expected.txt").openStream(), utf8);
+		InputStreamReader reader2 = new InputStreamReader(this.getClass().getResource("/sherlock-expected.txt").openStream(), utf8);
 		LineNumberReader expected = new LineNumberReader(reader2);
 		
 		String inputLine;
@@ -149,13 +149,13 @@ public class HyphenatorTest {
 		
 		Hyphenator hyphenator = new Hyphenator();
 		Utf8TexParser parser = new Utf8TexParser();
-		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8);
+		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("/hyph-sv-utf8.tex"), utf8);
 		RuleDefinition r = parser.parse(ruleFileReader);
 		hyphenator.setRuleSet(r);
 		ruleFileReader.close();
 
 		assertHyphenation(hyphenator, "Blom­mi­ga­re bön­der en­vi­sa­des med att styv­fas­ter in-te rag-lar på torg.");
-		assertHyphenation(hyphenator, "Kall-pra-ta om te­ma­in­rik­ta­de kon­junk­tur­väx­ling­ar med män-ni-sko-rätts-ak-ti-vis-ter.");
+		assertHyphenation(hyphenator, "Kall-pra-ta om te­ma­in­rik­ta­de kon­junk­tur­väx­ling­ar med män­ni­sko­rätts­ak­ti­vis­ter.");
 		assertHyphenation(hyphenator, "Röst­be­rät­ti­ga­de tvil­ling­föds­lar re­sul­te­rar i re­ha­bi­li­te­rings­pla­ne­ring.");
 	}
 	
@@ -175,15 +175,15 @@ public class HyphenatorTest {
 		
 		Hyphenator hyphenator = new Hyphenator();
 		Utf8TexParser parser = new Utf8TexParser();
-		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("resource-files/hyph-sv-utf8.tex"), utf8);
+		final InputStreamReader ruleFileReader = new InputStreamReader(this.getClass().getResourceAsStream("/hyph-sv-utf8.tex"), utf8);
 		RuleDefinition r = parser.parse(ruleFileReader);
 		hyphenator.setRuleSet(r);
 		ruleFileReader.close();
 
-		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sv-dictionary-input.txt").openStream(), utf8);
+		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("/sv-dictionary-input.txt").openStream(), utf8);
 		LineNumberReader input = new LineNumberReader(reader);
 		
-		InputStreamReader reader2 = new InputStreamReader(this.getClass().getResource("resource-files/sv-dictionary-expected.txt").openStream(), utf8);
+		InputStreamReader reader2 = new InputStreamReader(this.getClass().getResource("/sv-dictionary-expected.txt").openStream(), utf8);
 		LineNumberReader expected = new LineNumberReader(reader2);
 		
 		String inputLine;
@@ -215,10 +215,10 @@ public class HyphenatorTest {
 	public void createComparisionFile() throws FileNotFoundException, IOException {
 		//u00ad is soft hyphen
 		Hyphenator hyphenator = new Hyphenator();
-		hyphenator.loadTable(this.getClass().getResource("resource-files/ushyph.tex").openStream());
+		hyphenator.loadTable(this.getClass().getResource("/ushyph.tex").openStream());
 		Charset utf8 = Charset.forName("UTF-8");
 		
-		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("resource-files/sherlock.txt").openStream(), utf8);
+		InputStreamReader reader = new InputStreamReader(this.getClass().getResource("/sherlock.txt").openStream(), utf8);
 		LineNumberReader input = new LineNumberReader(reader);
 		
 		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("out.txt")), utf8);

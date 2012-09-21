@@ -65,6 +65,11 @@
 				</fileset>
 			</classpath>
 	    </javac>
+    	
+    	<!-- Copy required resource files -->
+    	<copy todir="${test-build.dir}" >
+    	  <fileset dir="${test-resources.dir}"/>
+    	</copy>
     </target>
 	
 	<target name="runUnitTests" description="Run unit tests" depends="compileTests">
