@@ -12,7 +12,7 @@ import net.davidashen.util.List;
 /**
  * Tree structure for representing hyphenation rules in a type safe manner.
  */
-public class TreeNode {
+public class TreeNode { 
 	private static final Logger log = Logger.getLogger(TreeNode.class.getCanonicalName()); 
 	private final  String segment;
 	private final int[] hyphenation;
@@ -193,10 +193,17 @@ public class TreeNode {
 		StringBuffer pattern = new StringBuffer();
 		
 		for(int i =0; i < segment.length(); i++) {
-			pattern.append(hyphenation[i]);
+			
+			final int prefixHyphenatoion = hyphenation[i];
+			if(prefixHyphenatoion>0) {
+				pattern.append(prefixHyphenatoion);
+			}
 			pattern.append(segment.charAt(i));
 		}
-		pattern.append(hyphenation[segment.length()]);
+		final int lastHyphenation = hyphenation[segment.length()];
+		if(lastHyphenation>0) {
+			pattern.append(lastHyphenation);
+		}
 		
 		return pattern.toString();
 	}
