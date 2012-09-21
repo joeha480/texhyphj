@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="buildDoc">
 
-	<property name="src.dir" value="${basedir}/src"/>
+	<import file="build-properties.xml"/>
+	
 	<property name="classes" value="${basedir}/bin"/>
 	<property name="ant-build.dir" value="${basedir}/ant-build"/>
 	<property name="ant-output.dir" value="${ant-build.dir}/output"/>
@@ -26,7 +27,7 @@
         	notree="false" 
         	packagenames="net.davidashen.*"
         	source="1.5" 
-        	sourcepath="${src.dir}" 
+        	sourcepath="${main-src.dir}" 
         	splitindex="true" 
         	use="true" 
         	version="true"

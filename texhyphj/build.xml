@@ -33,7 +33,7 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="compile" depends="emptyBuildDir, createDistDir">
     	<!-- Compile core files -->
-        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" encoding="UTF-8" debug="true">
+        <javac srcdir="${main-src.dir}" destdir="${build.dir}" includeantruntime="false" encoding="UTF-8" debug="true">
 			<classpath>
 				<fileset dir="${lib.dir}">
 					<include name="*.jar"/>
@@ -49,7 +49,7 @@
     		<fileset dir="${build.dir}">
     			<patternset refid="dist-jar.patternset"/>
     		</fileset>
-    		<fileset dir="${src.dir}">
+    		<fileset dir="${main-src.dir}">
     			<patternset refid="dist-jar.patternset"/>  			
     		</fileset>
     		<manifest>
@@ -74,7 +74,7 @@
     		<zipfileset dir="${javadoc.dir}" prefix="${zip-foler-prefix}/doc/api">
     			<include name="**/*.*"/>
     		</zipfileset>
-    		<zipfileset dir="${src.dir}" prefix="${zip-foler-prefix}">
+    		<zipfileset dir="${main-src.dir}" prefix="${zip-foler-prefix}">
     			<include name="**/*.*"/>
     		</zipfileset>
     		<zipfileset dir="${doc.dir}" prefix="${zip-foler-prefix}/doc">
