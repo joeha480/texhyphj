@@ -84,6 +84,21 @@
           </archive>
         </configuration>
       </plugin>
+<!-- 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <configuration></configuration>
+         <executions>
+	     <execution>
+	       <phase>compile</phase>
+	       <goals>
+	         <goal>javadoc</goal>
+	       </goals>
+	     </execution>
+	   </executions>
+      </plugin> -->
     </plugins>
   </build>
   
@@ -92,26 +107,9 @@
 		  <plugin>
 	         <groupId>org.apache.maven.plugins</groupId>
 	         <artifactId>maven-javadoc-plugin</artifactId>
-	         <version>2.7</version>
+	         <version>2.9</version>
 	         <configuration>
-	             <outputDirectory>${project.build.directory}/apidocs</outputDirectory>
-	             <overview>overview.html</overview>
-	             <excludedocfilessubdir>CVS</excludedocfilessubdir>
-	             <docfilessubdirs>true</docfilessubdirs>
-	             <source>1.6</source>
 	         </configuration>
-	         <reportSets>
-	             <reportSet>
-	                 <id>html</id>
-	                 <configuration>
-	                     <doctitle>API for ${project.name} ${project.version}</doctitle>
-	                     <windowtitle>API for ${project.name} ${project.version}</windowtitle>
-	                 </configuration>
-	                 <reports>
-	                     <report>javadoc</report>
-	                 </reports>
-	             </reportSet>
-	         </reportSets>
 	     </plugin>
 	  </plugins>
   </reporting>
