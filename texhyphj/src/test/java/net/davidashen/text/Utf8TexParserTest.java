@@ -51,7 +51,7 @@ public class Utf8TexParserTest {
 		RuleDefinition result = parser.parse("\\patterns{}\n\\hyphenation{as-so-ciate}");
 		
 		final int[] exception = result.getException("associate");
-		assertArrayEquals(new int[]{0,0,1,0,1,0,0,0,0,0}, exception);
+		assertArrayEquals(new int[]{0,1,0,1,0,0,0,0,0,0}, exception);
 	} 
 	
 	@Test
@@ -60,10 +60,10 @@ public class Utf8TexParserTest {
 		RuleDefinition result = parser.parse("\\patterns{}\n\\hyphenation{as-so-ciate\noblig-a-tory}");
 		
 		final int[] associateException = result.getException("associate");
-		assertArrayEquals(new int[]{0,0,1,0,1,0,0,0,0,0}, associateException);
+		assertArrayEquals(new int[]{0,1,0,1,0,0,0,0,0,0}, associateException);
 
 		final int[] obligatoryException = result.getException("obligatory");
-		assertArrayEquals(new int[]{0,0,0,0,0,1,1,0,0,0,0}, obligatoryException);
+		assertArrayEquals(new int[]{0,0,0,0,1,1,0,0,0,0,0}, obligatoryException);
 	}
 	
 	
@@ -77,7 +77,7 @@ public class Utf8TexParserTest {
 		assertEquals( "((b [0, 0] (a [0, 0, 0] (r [0, 1, 1, 0]) (z [0, 0, 0, 2]))))", patterns.describe());
 
 		final int[] exception = result.getException("associate");
-		assertArrayEquals(new int[]{0,0,1,0,1,0,0,0,0,0}, exception);
+		assertArrayEquals(new int[]{0,1,0,1,0,0,0,0,0,0}, exception);
 	}
 	
 	@Test

@@ -157,6 +157,7 @@ public class HyphenatorTest {
 		assertHyphenation(hyphenator, "Blom­mi­ga­re bön­der en­vi­sa­des med att styv­fas­ter in-te rag-lar på torg.");
 		assertHyphenation(hyphenator, "Kall-pra-ta om te­ma­in­rik­ta­de kon­junk­tur­väx­ling­ar med män­ni­sko­rätts­ak­ti­vis­ter.");
 		assertHyphenation(hyphenator, "Röst­be­rät­ti­ga­de tvil­ling­föds­lar re­sul­te­rar i re­ha­bi­li­te­rings­pla­ne­ring.");
+		assertHyphenation(hyphenator, "tvärs-över");
 	}
 	
 	

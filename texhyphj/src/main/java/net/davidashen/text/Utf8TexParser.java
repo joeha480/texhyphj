@@ -147,7 +147,7 @@ public class Utf8TexParser {
 		for (int i = 0; i < exceptedWord.length(); i++) {
 			char ch = exceptedWord.charAt(i);
 			if (ch == '-') {
-				tmpHyphenations[characterCount] = 1;
+				tmpHyphenations[characterCount-1] = 1;
 			} else {
 				characterCount++;
 			}
