@@ -6,7 +6,7 @@
 	<tstamp><format property="ISO-TODAY" pattern="yyyy-MM-dd"/></tstamp>
 	
 	<property name="release-name" value="texhyphj"/>
-	<property name="release-version" value="1.2-rc"/>
+	<property name="release-version" value="1.2"/>
 	<property name="release-url" value="http://code.google.com/p/texhyphj/"/>
 	
 	<property name="ant-build.dir" value="${basedir}/ant-build"/>
