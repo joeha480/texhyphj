@@ -82,6 +82,9 @@
           <archive>
             <addMavenDescriptor>false</addMavenDescriptor>
           </archive>
+          <instructions>
+          	<Include-Resource>/ = src/main/java/</Include-Resource>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>
