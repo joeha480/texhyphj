@@ -19,7 +19,7 @@ public class TreeNode {
 	private final boolean blank;
 	private final Map<Character, TreeNode> children = new Hashtable<Character, TreeNode>();
 
-	private final static Comparator<TreeNode> CHILD_ORDER_COMPARATOR = new Comparator<TreeNode>() {
+	private static final Comparator<TreeNode> CHILD_ORDER_COMPARATOR = new Comparator<TreeNode>() {
 		public int compare(TreeNode o1, TreeNode o2) {
 			if( o1.getLastCharacter() > o2.getLastCharacter()) {
 				return 1;

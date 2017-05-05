@@ -14,7 +14,7 @@ public class List implements Cloneable {
   private Link head, tail;
   private int length;
 
-  final static class Link {
+  static final class Link {
     Object data; Link next;
   }
 

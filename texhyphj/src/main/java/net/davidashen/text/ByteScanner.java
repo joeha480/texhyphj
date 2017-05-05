@@ -8,7 +8,7 @@ import net.davidashen.util.List;
 
 /* parser for TeX hyphenation tables */
 class ByteScanner implements RuleDefinition {
-	final static short EOF = 0, LBRAC = 1, RBRAC = 2, PATTERNS = 3, EXCEPTIONS = 4, PATTERN = 5;
+	static final short EOF = 0, LBRAC = 1, RBRAC = 2, PATTERNS = 3, EXCEPTIONS = 4, PATTERN = 5;
 	
 	private final ErrorHandler eh;
 	private final List[] entrytab;
