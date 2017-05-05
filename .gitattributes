@@ -1,40 +1,46 @@
-* text=auto !eol
-texhyphj/.classpath -text
-texhyphj/.project -text
-texhyphj/.settings/org.eclipse.jdt.core.prefs -text
-texhyphj/ant-build/resources/etc/hyphen/dehypha.tex -text
-texhyphj/ant-build/resources/etc/hyphen/dehyphx.tex -text
-texhyphj/ant-build/resources/etc/hyphen/hyphen.tex -text
-texhyphj/ant-build/resources/etc/hyphen/koicodes.txt -text
-texhyphj/ant-build/resources/etc/hyphen/ruhyphal.tex -text
-texhyphj/ant-build/resources/javase-6/package-list -text
-texhyphj/build-doc.xml -text
-texhyphj/build-properties.xml -text
-texhyphj/build.xml -text
-texhyphj/doc/INSTALL -text
-texhyphj/doc/LICENSE -text
-texhyphj/doc/README -text
-texhyphj/lib/hamcrest-all-1.3.jar -text
-texhyphj/lib/junit-4.7.jar -text
-texhyphj/pom.xml -text
-texhyphj/run-tests.xml -text
-texhyphj/src/main/java/net/davidashen/text/ByteScanner.java -text
-texhyphj/src/main/java/net/davidashen/text/Hyphenator.java -text
-texhyphj/src/main/java/net/davidashen/text/HyphenatorUI.java -text
-texhyphj/src/main/java/net/davidashen/text/RuleDefinition.java -text
-texhyphj/src/main/java/net/davidashen/text/TreeNode.java -text
-texhyphj/src/main/java/net/davidashen/text/Utf8TexParser.java -text
-texhyphj/src/main/java/net/davidashen/util/Applicator.java -text
-texhyphj/src/main/java/net/davidashen/util/ErrorHandler.java -text
-texhyphj/src/main/java/net/davidashen/util/Hashtable.java -text
-texhyphj/src/main/java/net/davidashen/util/List.java -text
-texhyphj/src/main/java/net/davidashen/util/LoggingErrorHandler.java -text
-texhyphj/src/test/java/net/davidashen/text/HyphenatorTest.java -text
-texhyphj/src/test/java/net/davidashen/text/TreeNodeTest.java -text
-texhyphj/src/test/java/net/davidashen/text/Utf8TexParserTest.java -text
-texhyphj/src/test/resources/hyph-sv-utf8.tex -text
-texhyphj/src/test/resources/sherlock-expected.txt -text
-texhyphj/src/test/resources/sherlock.txt -text
-texhyphj/src/test/resources/sv-dictionary-expected.txt -text
-texhyphj/src/test/resources/sv-dictionary-input.txt -text
-texhyphj/src/test/resources/ushyph.tex -text
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
+*    text=auto
+ 
+#
+# Exceptions to the rule above
+#
+# These files are text and should be normalized (Convert crlf => lf)
+*.adoc          text
+*.bat            eol=crlf
+*.css           text
+*.csv           text
+*.df            text
+*.htm           text
+*.html          text
+*.java          text
+*.js            text
+*.json          text
+*.jsp           text
+*.jspf          text
+*.md            text
+*.mustache      text
+*.properties    text
+*.sh            eol=lf
+*.sql           text
+*.svg           text
+*.tab           text
+*.textile       text
+*.tld           text
+*.tsv           text
+*.txt           text
+*.xml           text
+ 
+# These files are binary and should be left untouched
+# (binary is a macro for -text -diff)
+*.class         binary
+*.dll           binary
+*.ear           binary
+*.gif           binary
+*.ico           binary
+*.jar           binary
+*.jpg           binary
+*.jpeg          binary
+*.png           binary
+*.so            binary
+*.war           binary
