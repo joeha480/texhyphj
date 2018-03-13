@@ -8,10 +8,10 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 javadoc {
 	options.encoding = 'UTF-8'
-	options.links('http://docs.oracle.com/javase/6/docs/api/');
+	options.links('http://docs.oracle.com/javase/8/docs/api/');
 }
-sourceCompatibility = '1.6'
-targetCompatibility = '1.6'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 def repoRevision = System.getenv("REPO_REVISION")!=null?System.getenv("REPO_REVISION"):repositoryRevision
 
