@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 //custom plugins
-apply plugin: "org.dm.bundle"
+//apply plugin: "org.dm.bundle"
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
@@ -14,17 +14,17 @@ sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
 
 group = "com.googlecode.texhyphj"
-version = "1.2.1-SNAPSHOT"
 
 jar {
 	doFirst {
 		manifest {
-	    	attributes ('Built-By': '',				//'${user.name}'
-	    	'Built-On': new Date(),					//'${ISO-TODAY}'
+	    	attributes (
+			'Built-By': System.getProperty("user.name"),
+			'Built-On': new Date().format('yyyy-MM-dd'),
 			'Repository-Revision': "$repositoryRevision",
-			'Implementation-Title': "$releaseName Core",
-			'Implementation-Version': "$releaseVersion",
-			'Implementation-URL': 'http://code.google.com/p/texhyphj/',
+			'Implementation-Title': "$releaseName",
+			'Implementation-Version': version,
+			'Implementation-URL': "$repositoryURL",
 			)
 		}
 	}
@@ -62,10 +62,12 @@ buildscript {
     dependencies { classpath group: "org.dm.gradle", name: "gradle-bundle-plugin", version: "0.6.4" }
 }
 
-bundle {
 /*
+bundle {
+
     instructions << [
      	//must use file() to resolve against the build.gradle in Eclipse
         "-include": file('bnd.bnd'),
-    ]*/
+    ]
 }
+*/
