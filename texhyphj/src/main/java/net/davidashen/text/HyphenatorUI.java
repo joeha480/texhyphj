@@ -4,7 +4,10 @@ import net.davidashen.util.ErrorHandler;
 
 public class HyphenatorUI {
 
-	/** simple command-line invocation -- serves as example */
+	/**
+	 * Simple command-line invocation -- serves as example
+	 * @param args the command line arguments
+	 */
 	public static void main(String[] args) {
 		Hyphenator hyphenator = new Hyphenator();
 		hyphenator.setErrorHandler(new ErrorHandler() {

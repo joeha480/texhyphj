@@ -48,7 +48,7 @@ public class Hyphenator {
 	/**
 	 * installs error handler.
 	 * 
-	 * @param errorHandler
+	 * @param eh
 	 *            ErrorHandler used while parsing and hyphenating
 	 * @see net.davidashen.util.ErrorHandler
 	 */
@@ -77,7 +77,7 @@ public class Hyphenator {
 	 * 
 	 * @param in
 	 *            hyphenation table
-	 * @throws java.io.IOException
+	 * @throws java.io.IOException if an I/O error occurs
 	 */
 	public void loadTable(java.io.InputStream in) throws java.io.IOException {
 		int[] codelist = new int[256];
@@ -95,7 +95,7 @@ public class Hyphenator {
 	 *            hyphenation table
 	 * @param codelist
 	 *            an array of 256 elements. maps one-byte codes to UTF codes
-	 * @throws java.io.IOException
+	 * @throws java.io.IOException if an I/O error occurs
 	 */
 	public void loadTable(java.io.InputStream in, int[] codelist)
 			throws java.io.IOException {

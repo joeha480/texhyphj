@@ -33,6 +33,7 @@ public class TreeNode {
 	
 	/**
 	 * Create a root node to create all other nodes inside.
+	 * @return returns a tree node
 	 */
 	public static TreeNode createRoot() {
 		return new TreeNode("");
@@ -40,6 +41,8 @@ public class TreeNode {
 	
 	/**
 	 * Create a new node from a string pattern
+	 * @param pattern a string pattern
+	 * @return returns a tree node
 	 */
 	public static TreeNode createFromPattern(String pattern) {
 		char[] patternChars = pattern.toCharArray();
@@ -86,6 +89,7 @@ public class TreeNode {
 
 	/**
 	 * Create a node with no hyphenation information (a blank node).
+	 * @param segment a segment
 	 */
 	public TreeNode(String segment) {
 		this.segment = segment;
@@ -95,6 +99,8 @@ public class TreeNode {
 
 	/**
 	 * Create a node with hyphenation information.
+	 * @param segment a segment
+	 * @param hyphenationData the hyphenation data 
 	 */
 	public TreeNode(String segment, int[] hyphenationData) {
 		if(segment.length() +1 != hyphenationData.length ) {
@@ -170,6 +176,7 @@ public class TreeNode {
 
 	/**
 	 * Parse pattern and add the resulting segment and hyphernation to the tree.
+	 * @param pattern the pattern
 	 */
 	public void createChildFromPattern(String pattern) {
 		TreeNode tmpNode = TreeNode.createFromPattern(pattern); 
@@ -218,6 +225,7 @@ public class TreeNode {
 
 	/**
 	 * Is this the root node onto which all other nodes should be added?
+	 * @return returns true if this is the root node, false otherwise
 	 */
 	public boolean isRoot() {
 		return this.segment == "";
@@ -225,6 +233,7 @@ public class TreeNode {
 
 	/**
 	 * Node is only a place holder required by the tree structure.
+	 * @return returns true if the node is a place holder, false otherwise
 	 */
 	public boolean isBlank() {
 		return this.blank;
@@ -232,6 +241,7 @@ public class TreeNode {
 
 	/**
 	 * Create texhyphj original (lisp like) List structure from node tree for consumption by Hypernator  
+	 * @return returns a list
 	 */
 	public List toList() {
 		List list = new List();
