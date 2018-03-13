@@ -3,3 +3,6 @@ texhyphj/bin
 texhyphj/target
 .settings
 .gradle/
+ant-build/output/
+build/
+target/
