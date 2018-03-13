@@ -6,3 +6,4 @@ texhyphj/target
 ant-build/output/
 build/
 target/
+bin/
