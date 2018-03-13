@@ -1,2 +1,5 @@
 language: java
 jdk: oraclejdk8
+before_install:
+- openssl aes-256-cbc -K $encrypted_2a8caa8b2c08_key -iv $encrypted_2a8caa8b2c08_iv
+  -in secring.gpg.enc -out secring.gpg -d
