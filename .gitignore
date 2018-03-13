@@ -7,3 +7,5 @@ ant-build/output/
 build/
 target/
 bin/
+.project
+.classpath
