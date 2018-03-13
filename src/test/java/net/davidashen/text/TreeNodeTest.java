@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class TreeNodeTest {
 	private static Logger log;
 	private static TreeNodeTest.EavesdroppingLogHandler logHandler; 
@@ -201,7 +202,6 @@ public class TreeNodeTest {
 	 * This may be a sign of an incorrect patterns file.
 	 */
 	@Test 
-	@SuppressWarnings("unchecked")
 	public void shouldWarnOnDuplicateNode() {
 		TreeNode root = TreeNode.createRoot();
 		root.createChildFromPattern("f1oo");
@@ -215,7 +215,6 @@ public class TreeNodeTest {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void canProduceListStructure() {
 		TreeNode root = TreeNode.createFromPattern("z");
 		root.createChildFromPattern("za1");

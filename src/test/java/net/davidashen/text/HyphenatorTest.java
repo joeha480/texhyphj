@@ -18,6 +18,7 @@ import net.davidashen.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class HyphenatorTest {
 
 	@Test

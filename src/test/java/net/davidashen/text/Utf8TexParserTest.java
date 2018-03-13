@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.equalTo;
 
 
+@SuppressWarnings("javadoc")
 public class Utf8TexParserTest {
 
 	@Test
