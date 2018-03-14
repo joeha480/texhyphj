@@ -3,6 +3,12 @@ plugins {
 }
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = "com.googlecode.texhyphj"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
@@ -10,12 +16,8 @@ javadoc {
 	options.encoding = 'UTF-8'
 	options.links('http://docs.oracle.com/javase/8/docs/api/');
 }
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 def repoRevision = System.getenv("REPO_REVISION")!=null?System.getenv("REPO_REVISION"):repositoryRevision
-
-group = "com.googlecode.texhyphj"
 
 repositories {
 	mavenCentral()
@@ -30,12 +32,80 @@ dependencies {
 bundle {
 	instructions << [
 		'Export-Package': 'net.davidashen.*',
-	 	'Built-By': System.getProperty("user.name"),
+		'Built-By': System.getProperty("user.name"),
 		'Built-On': new Date().format('yyyy-MM-dd'),
 		'Implementation-Title': "$releaseName",
 		'Repository-Revision': "$repositoryRevision",
 		'Repository-URL': "$repositoryURL",
 	]
+}
+
+task javadocJar(type: Jar) {
+	classifier = 'javadoc'
+	from javadoc
+}
+
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives javadocJar, sourcesJar
+}
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+signing {
+	required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+	sign configurations.archives
+}
+
+uploadArchives {
+	//Only upload if a git hash is supplied. On Travis only upload snapshots.
+	enabled = repoRevision.size()==40 && System.getenv("TRAVIS_BUILD_ID")!=null
+	repositories {
+		mavenDeployer {
+			if (isReleaseVersion) {
+				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			}
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+				authentication(userName: sonatypeUsername, password: sonatypePassword)
+			}
+			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+				authentication(userName: sonatypeUsername, password: sonatypePassword)
+			}
+			pom.project {
+				name 'texhyphj'
+				packaging 'jar'
+				description 'TeX Hyphenator in Java.'
+				url "$repositoryURL"
+				scm {
+					connection "$repositorySCM"
+					developerConnection "$repositorySCM"
+					url "$repositoryURL"
+				}
+				licenses {
+					license {
+						name 'LGPL'
+						url 'http://www.gnu.org/licenses/lgpl.html'
+					}
+				}
+				developers {
+					developer {
+						name 'David Tolpin'
+					}
+					developer {
+						id 'joel'
+						name 'Joel Håkansson'
+					}
+					developer {
+						name 'Jakob Eklund'
+					}
+				}
+			}
+		}
+	}
 }
 
 task zip(type: Zip, dependsOn: [jar, javadoc]) {
