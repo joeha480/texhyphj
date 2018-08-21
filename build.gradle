@@ -118,7 +118,7 @@ task zip(type: Zip, dependsOn: [jar, javadoc]) {
 			}
 		}
 		into ('etc') { 
-			from('ant-build/resources/etc')
+			from('build-resources/etc')
 		}
 		from ('src/main/java')
 	}
