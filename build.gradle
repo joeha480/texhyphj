@@ -1,9 +1,20 @@
+// For bnd
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.3.0'
+	}
+}
+
 plugins {
 	id 'java'
 	id 'maven'
 	id 'signing'
-	id 'org.dm.bundle' version '0.10.0'
 }
+
+apply plugin: 'biz.aQute.bnd.builder'
 
 group = "com.googlecode.texhyphj"
 
@@ -29,15 +40,20 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.7'
 }
 
-bundle {
-	instructions << [
-		'Export-Package': 'net.davidashen.*',
-		'Built-By': System.getProperty("user.name"),
-		'Built-On': new Date().format('yyyy-MM-dd'),
-		'Implementation-Title': "$releaseName",
-		'Repository-Revision': "$repositoryRevision",
-		'Repository-URL': "$repositoryURL",
-	]
+jar {
+	manifest {
+		attributes(
+			// See https://github.com/bndtools/bnd/issues/2677
+			'-exportcontents': 'net.davidashen.*',
+			'Bundle-Name': "$bundleName",
+			'Bundle-SymbolicName': "$bundleName",
+			'Built-By': System.getProperty("user.name"),
+			'Built-On': new Date().format('yyyy-MM-dd'),
+			'Implementation-Title': "$releaseName",
+			'Repository-Revision': "$repositoryRevision",
+			'Repository-URL': "$repositoryURL",
+		)
+	}
 }
 
 task javadocJar(type: Jar) {
