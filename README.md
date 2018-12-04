@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/joeha480/texhyphj.svg?branch=master)](https://travis-ci.org/joeha480/texhyphj)
+[![Build Status](https://travis-ci.com/joeha480/texhyphj.svg?branch=master)](https://travis-ci.com/joeha480/texhyphj)
 
 # texhyphj
 Supporting TeX hyphenation patterns in Java
