@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
 	id 'java'
-	id 'maven'
+	id 'maven-publish'
 	id 'signing'
 }
 
@@ -36,8 +36,8 @@ repositories {
 }
 
 dependencies {
-	testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-	testCompile group: 'junit', name: 'junit', version: '4.7'
+	testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+	testImplementation group: 'junit', name: 'junit', version: '4.7'
 }
 
 jar {
@@ -66,59 +66,64 @@ task sourcesJar(type: Jar) {
 	from sourceSets.main.allSource
 }
 
-artifacts {
-	archives javadocJar, sourcesJar
-}
-
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 signing {
-	required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
-	sign configurations.archives
+	required { isReleaseVersion }
+	sign publishing.publications
 }
 
-uploadArchives {
+publishing {
 	//Only upload if a git hash is supplied. On Travis only upload snapshots.
-	enabled = repoRevision.size()==40 && System.getenv("TRAVIS_BUILD_ID")!=null
-	repositories {
-		mavenDeployer {
+	//enabled = repoRevision.size()==40 && System.getenv("TRAVIS_BUILD_ID")!=null
+	publications {
+		maven(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+			/*
 			if (isReleaseVersion) {
 				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-			}
-			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-				authentication(userName: sonatypeUsername, password: sonatypePassword)
-			}
-			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-				authentication(userName: sonatypeUsername, password: sonatypePassword)
-			}
-			pom.project {
-				name 'texhyphj'
-				packaging 'jar'
-				description 'TeX Hyphenator in Java.'
-				url "$repositoryURL"
+			}*/
+			pom {
+				name = 'texhyphj'
+				packaging = 'jar'
+				description = 'TeX Hyphenator in Java.'
+				url = "$repositoryURL"
 				scm {
-					connection "$repositorySCM"
-					developerConnection "$repositorySCM"
-					url "$repositoryURL"
+					connection = "$repositorySCM"
+					developerConnection = "$repositorySCM"
+					url = "$repositoryURL"
 				}
 				licenses {
 					license {
-						name 'LGPL'
-						url 'http://www.gnu.org/licenses/lgpl.html'
+						name = 'LGPL'
+						url = 'http://www.gnu.org/licenses/lgpl.html'
 					}
 				}
 				developers {
 					developer {
-						name 'David Tolpin'
+						name = 'David Tolpin'
 					}
 					developer {
-						id 'joel'
-						name 'Joel Håkansson'
+						id = 'joel'
+						name = 'Joel Håkansson'
 					}
 					developer {
-						name 'Jakob Eklund'
+						name = 'Jakob Eklund'
 					}
 				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			def stagingRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : stagingRepoUrl
+			credentials {
+				username = sonatypeUsername
+				password = sonatypePassword
 			}
 		}
 	}
